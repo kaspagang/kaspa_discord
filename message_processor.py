@@ -1,13 +1,9 @@
 
-from spellchecker import SpellChecker
-
 from kaspy.kaspa_clients import RPCClient
 
-from .defines import commands as cmds, answers as ans, devfund_addresses as dev_addrs
-from spellchecker import SpellChecker
+from defines import commands as cmds, answers as ans, devfund_addresses as dev_addrs
 import discord
 
-spell_checker = SpellChecker()
 
 
 class message_processor:
@@ -67,16 +63,8 @@ class message_processor:
     self.output_sg + f'\n\n I do not understand, perhaps I can help with `@{self.name} ${cmds.HELP}`'
 
   def invalid_command(self, command):
-    likely_command_str = None
-    for candidate in spell_checker.candidates(command):
-      if candidate in self.message_to_func.keys():
-        likely_command_str = f' - Perhaps you meant `${candidate}`'
-        break
-    if likely_command_str:
-      self.answers.append(f'I do not understand the command: `${command}`', + f'{likely_command_str}')
-    else:
-      self.answers.append(f'I do not understand the command: `${command}` \n' + 
-                           f'type `@{self.name} ${cmds.cmds}` for a list of available commands')
+    self.answers.append(f'I do not understand the command: `${command}` \n' + 
+                          f'type `@{self.name} ${cmds.cmds}` for a list of available commands')
     
   def devfund(self):
     self.answers.append(
