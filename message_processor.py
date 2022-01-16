@@ -1,8 +1,7 @@
 
 from spellchecker import SpellChecker
-from kaspy.kaspy.client import kaspa_client
 
-
+from kaspy.kaspa_clients import RPCClient
 
 from .defines import commands as cmds, messages as msgs
 from spellchecker import SpellChecker
@@ -14,7 +13,7 @@ spell_checker = SpellChecker()
 class message_processor:
 
   def __init__(self, msg : discord.Message, client:discord.Client):
-    self.kaspa_client = kaspa_client()
+    self.kaspa_client = RPCClient()
     self.kaspa_client.auto_connect()
     self.client = client
     self.input_message = msg
