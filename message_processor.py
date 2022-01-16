@@ -3,7 +3,7 @@ from spellchecker import SpellChecker
 
 from kaspy.kaspa_clients import RPCClient
 
-from .defines import commands as cmds, messages as msgs
+from .defines import commands as cmds, answers as ans, devfund_addresses as dev_addrs
 from spellchecker import SpellChecker
 import discord
 
@@ -14,13 +14,13 @@ class message_processor:
 
   def __init__(self, msg : discord.Message, client:discord.Client):
     self.kaspa_client = RPCClient()
-    self.kaspa_client.auto_connect()
-    self.client = client
+    self.kaspa_client.auto_connect(new_conn_on_err=True)
+    self.discord_client = client
     self.input_message = msg
     self.name = client.user
     self.commands = self._get_commands()
     self.partner = msg.user
-    self.messages = list(msgs.INITAL_GREETING(self.partner, self.name))
+    self.answers = list(ans.INITAL_GREETING(self.partner, self.name))
 
     self.cmd_to_func = {
         cmds.DEVFUND : self.devfund,
@@ -29,14 +29,16 @@ class message_processor:
         cmds.BALANCE : self.balance,
         cmds.MINING_REWARDS : self.mining_rewards,
         cmds.MINING_RATE : self.mining_rate,
-        cmds.STATS : self.stats
+        cmds.STATS : self.stats,
+        cmds.VALUE : self.value
     }
 
   def answer(self):
     self.preprocess_message()
     self.process_message()
-    self.messages.append(msgs.TIPS(self.name))
-    return self.input_message.channel.send('\n\n'.join(self.messages))
+    self.answers.append(ans.TIPS(self.name))
+    self.kaspa_client.close()
+    return self.input_message.channel.send('\n\n'.join(self.answers))
 
   def preprocess_message(self):
     self.input_message.content = self.input_message.content[len(self.name)+1:]
@@ -71,16 +73,20 @@ class message_processor:
         likely_command_str = f' - Perhaps you meant `${candidate}`'
         break
     if likely_command_str:
-      self.messages.append(f'I do not understand the command: `${command}`', + f'{likely_command_str}')
+      self.answers.append(f'I do not understand the command: `${command}`', + f'{likely_command_str}')
     else:
-      self.messages.append(f'I do not understand the command: `${command}` \n' + 
+      self.answers.append(f'I do not understand the command: `${command}` \n' + 
                            f'type `@{self.name} ${cmds.cmds}` for a list of available commands')
     
   def devfund(self):
-    raise NotImplementedError
+    self.answers.append(
+      ans.DEVFUND(
+        self._retrive_balance(dev_addrs.MINING_ADDR), 
+        self._retrive_balance(dev_addrs.DONATION_ADDR),
+        ))
   
   def help(self):
-    raise NotImplementedError
+    self.answers.append(ans.HELP)
   
   def suggestion(self):
     raise NotImplementedError
@@ -102,4 +108,8 @@ class message_processor:
     return resp['balance']
   
   def _get_hashrate(self):
+    resp = self.kaspa_client.request('getBlockDagInfoRequest')
+    return int(resp['difficulty'])*2
+  
+  def value(self):
     raise NotImplementedError

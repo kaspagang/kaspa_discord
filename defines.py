@@ -1,6 +1,3 @@
-from main import kaspabot_client
-
-
 class commands:
 
     DEVFUND = 'devfund' 
@@ -19,7 +16,7 @@ class devfund_addresses:
     MINING_ADDR = ''
     DONATION_ADDR = ''
 
-class messages:
+class answers:
     
     class placeholders:
         ADDR = '<kaspa_address>'
@@ -39,7 +36,6 @@ class messages:
     '''
     HELP = f'''
         ${commands.DEVFUND}:
-        NotImplemented
         list addresses and balances associated with the devfund
 
         ${commands.DONATE}:
@@ -74,6 +70,7 @@ class messages:
         1) mining rate is infered by 'last 5 '500 KAS' TXS recevied / num_of_seconds elapsed'
 
         `${commands.MINING_REWARDS} {placeholders.HASHRATE}`:
+        NotImplemented
         calculate approx. blocks per second, minute, hour and day with your hashrate compared to the current network hashrate
 
         `${commands.TIP_OF_THE_DAY}`:
@@ -94,8 +91,8 @@ class messages:
         returns useful links and guides related to kaspa
         '''
     
-    DEVFUND = lambda mining_addr_value, donation_addr_value, mining_addr_mining_rate : f'''
+    DEVFUND = lambda mining_addr_value, donation_addr_value : f'''
     {devfund_addresses.DONATION_ADDR}     :   {donation_addr_value} KAS 
-    {devfund_addresses.MINING_ADDR}     :   {mining_addr_value} KAS @ approx. {mining_addr_mining_rate}
+    {devfund_addresses.MINING_ADDR}     :   {mining_addr_value} KAS
     TOTAL:  {mining_addr_value + donation_addr_value} KAS  
     '''

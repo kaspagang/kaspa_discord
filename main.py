@@ -1,7 +1,11 @@
 import os
 import discord
+from keep_alive import keep_alive
 from .message_processor import message_processor
 from .defines import *
+
+
+keep_alive()
 
 kaspabot_client = discord.client(os.environ['TOKEN'])
 
