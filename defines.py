@@ -13,8 +13,8 @@ class commands:
     VALUE = 'value'
 
 class devfund_addresses:
-    MINING_ADDR = ''
-    DONATION_ADDR = ''
+    MINING_ADDR = 'kaspa:pzhh76qc82wzduvsrd9xh4zde9qhp0xc8rl7qu2mvl2e42uvdqt75zrcgpm00'
+    DONATION_ADDR = 'kaspa:precqv0krj3r6uyyfa36ga7s0u9jct0v4wg8ctsfde2gkrsgwgw8jgxfzfc98'
 
 class answers:
     
@@ -92,7 +92,7 @@ class answers:
         '''
     
     DEVFUND = lambda mining_addr_value, donation_addr_value : f'''
-    {devfund_addresses.DONATION_ADDR}     :   {donation_addr_value} KAS 
-    {devfund_addresses.MINING_ADDR}     :   {mining_addr_value} KAS
+    'Donation addrs:'{devfund_addresses.DONATION_ADDR}     :   {donation_addr_value} KAS 
+    'Mining addrs:  '{devfund_addresses.MINING_ADDR}     :   {mining_addr_value} KAS
     TOTAL:  {mining_addr_value + donation_addr_value} KAS  
     '''
