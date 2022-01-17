@@ -20,7 +20,7 @@ async def on_ready():
 
 @discord_client.command()
 async def balance(cxt, address):
-  '''get balance of address'''
+  '''Get balance of address'''
   try:
     await cxt.send(ans.BALANCE(*kaspa.get_balances(address)))
   except:
@@ -59,7 +59,7 @@ async def hashrate(cxt):
 
 @discord_client.command()
 async def useful_links(cxt):
-  '''curtailed list of useful links'''
+  '''List of useful links'''
   try:
     await cxt.send(helpers.post_process_messages(ans.USEFUL_LINKS))
   except:
@@ -67,7 +67,8 @@ async def useful_links(cxt):
 
 @discord_client.command()
 async def mining_reward(cxt, own_hashrate):
-  '''please supply hashrate in the format: <digit>xH/s'''
+  '''Calculate mining rewards with specified hashrate
+     - please use the following input format: <float-digit>xH/s'''
   try:
     network_hashrate = kaspa.get_hashrate()
     own_hashrate = helpers.hashrate_to_int(own_hashrate)
@@ -78,7 +79,7 @@ async def mining_reward(cxt, own_hashrate):
 
 @discord_client.command()
 async def suggest(cxt, *suggestion):
-  '''send a suggestion to kasperbot'''
+  '''Send a suggestion for the development of kasperbot'''
   try:
     dev = await discord_client.fetch_user(DEV_ID)
     await dev.send(' '.join(suggestion))
