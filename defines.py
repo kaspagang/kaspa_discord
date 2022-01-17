@@ -62,5 +62,5 @@ class answers:
     {500*60*60*network_percent} KAS/hour
     {500*60*60*24*network_percent} KAS/day
     {500*60*60*24*7*network_percent} KAS/week
-    {500*60*60*24*7*(365.25/12)*network_percent} KAS/month
-    {500*60*60*24*7*365.25*network_percent} KAS/year'''
+    {500*60*60*24*(365.25/12)*network_percent} KAS/month
+    {500*60*60*24*365.25*network_percent} KAS/year'''

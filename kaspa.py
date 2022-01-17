@@ -11,7 +11,6 @@ def get_balances(*addrs):
   try:
     for addr in addrs:
       balance = cli.request('getBalanceByAddressRequest', {'address' : addr})
-      print(balance)
       if not balance['getBalanceByAddressResponse'].values():
         cli.close()
         get_balances(*addrs)
