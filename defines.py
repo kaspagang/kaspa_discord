@@ -25,7 +25,7 @@ class answers:
         HASHRATE = '<mhash/sec>'
         WINDOWSIZE = '<windowsize>'
         
-
+    FAILED = 'Could not process you command'
     INITAL_GREETING = lambda partner : f'Hello {partner}!'
     TIPS = lambda botname : f''' 
     Thanks for using {botname}\n\n
