@@ -59,7 +59,7 @@ async def useful_links(cxt):
 
 @discord_client.command()
 async def mining_reward(cxt, own_hashrate):
-  '''please supply hashrate in the format: <digit> xH/s'''
+  '''please supply hashrate in the format: <digit>xH/s'''
   network_hashrate = kaspa.get_hashrate()
   own_hashrate = helpers.hashrate_to_int(own_hashrate)
   percent_of_network = own_hashrate/network_hashrate
