@@ -7,8 +7,8 @@ from defines import answers as ans, devfund_addresses as dev_addrs
 
 keep_alive()
 
-discord_client = discord.client(os.environ['TOKEN'])
-bot = commands.Bot(command_prefix='/')
+discord_client = discord.Client()
+discord_client = commands.Bot(command_prefix='$')
 
 
 @discord_client.event
@@ -16,7 +16,7 @@ async def on_ready():
   print(f'running {discord_client.user}...')
 
 @discord_client.command()
-async def help(cxt):
+async def list(cxt):
   await cxt.send(ans.HELP)
 
 @discord_client.command()
@@ -33,4 +33,4 @@ async def devfund(cxt):
     )
 
 
-discord_client.run()
+discord_client.run(os.environ['TOKEN'])
