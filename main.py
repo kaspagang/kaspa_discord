@@ -5,6 +5,7 @@ from keep_alive import keep_alive
 import kaspa
 from defines import answers as ans, devfund_addresses as dev_addrs
 import helpers
+from requests import get
 
 keep_alive()
 
@@ -88,3 +89,12 @@ async def suggest(cxt, *suggestion):
     await cxt.send(ans.FAILED)
 
 discord_client.run(TOKEN)
+
+@discord_client.command()
+async def joke(cxt):
+  '''I tell a joke, you laugh'''
+  try:
+    joke = get('https://v2.jokeapi.dev/joke/Programming?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&format=txt').text
+    await cxt.send(joke)
+  except:
+    await cxt.send(ans.FAILED)

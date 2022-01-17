@@ -23,7 +23,6 @@ def normalize_hashrate(hashrate :int):
 
 def hashrate_to_int(str_hashrate : str):
   str_hashrate = str_hashrate.replace(" ", "")
-  print(str_hashrate)
   if str_hashrate[-4:] == 'KH/s':
     hash_digit = float(str_hashrate[:-4])
     return hash_digit*1_000
