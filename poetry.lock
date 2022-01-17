@@ -213,7 +213,7 @@ i18n = ["Babel (>=2.7)"]
 
 [[package]]
 name = "kaspy"
-version = "0.0.8"
+version = "0.0.9"
 description = "Python implementation of a kaspa grpc client"
 category = "main"
 optional = false
@@ -339,7 +339,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "decc5e6e2e81b99df9abd6a11ba6d3fac69038a0aab6fadb9d3b3c46af2182ca"
+content-hash = "bb57c0c1281e52d3a36b4813909e6bdd9a22011ae6e97fc9eaebbd080e186dbe"
 
 [metadata.files]
 aiohttp = [
@@ -534,7 +534,7 @@ jinja2 = [
     {file = "Jinja2-3.0.3.tar.gz", hash = "sha256:611bb273cd68f3b993fabdc4064fc858c5b47a973cb5aa7999ec1ba405c87cd7"},
 ]
 kaspy = [
-    {file = "kaspy-0.0.8-py3-none-any.whl", hash = "sha256:8e55085ae19c0a815d2e279216524d8f4dcb869c2bf199f7d9199bd31227c924"},
+    {file = "kaspy-0.0.9-py3-none-any.whl", hash = "sha256:eb6449e9aeb16c30cf132d2d53cc7009e80fff9390d0f01e50722a4c13b52647"},
 ]
 markupsafe = [
     {file = "MarkupSafe-2.0.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:d8446c54dc28c01e5a2dbac5a25f071f6653e6e40f3a8818e8b45d790fe6ef53"},

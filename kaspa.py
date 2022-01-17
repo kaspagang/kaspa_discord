@@ -6,26 +6,29 @@ logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 def get_balances(*addrs):
-  print('in balance')
-  cli = RPCClient()
-  cli.auto_connect(min_kaspad_version=ver(0,11,9), utxoindex=True)
-  print('connected')
-  balances = list()
   try:
-    for addr in addrs:
-      balance = cli.request('getBalanceByAddressRequest', {'address' : addr})
-      print(balance)
-      if not balance['getBalanceByAddressResponse'].values():
-        cli.close()
-        get_balances(*addrs)
-      balance = balance['getBalanceByAddressResponse']['balance']
-      balances.append(int(balance) / 100000000)
-  except:
+    print('in balance')
+    cli = RPCClient()
+    cli.auto_connect(min_kaspad_version=ver(0,11,9), utxoindex=True)
+    print('connected')
+    balances = list()
+    try:
+      for addr in addrs:
+        balance = cli.request('getBalanceByAddressRequest', {'address' : addr})
+        print(balance)
+        if not balance['getBalanceByAddressResponse'].values():
+          cli.close()
+          get_balances(*addrs)
+        balance = balance['getBalanceByAddressResponse']['balance']
+        balances.append(int(balance) / 100000000)
+    except:
+      cli.close()
+      get_balances(*addrs)
+    print(balance, 'kas')
     cli.close()
-    get_balances(*addrs)
-  print(balance, 'kas')
-  cli.close()
-  return balances
+    return balances
+  except:
+    return ans.FAILED
    
 def get_hashrate():
     try:
