@@ -1,4 +1,3 @@
-from defines import answers as ans
 def adjoin_messages(*msgs):
   nl = '\n\n'
   return f"```{nl.join(msgs)}```"
