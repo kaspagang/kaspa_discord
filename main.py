@@ -4,6 +4,7 @@ from discord.ext import commands
 from keep_alive import keep_alive
 import kaspa
 from defines import answers as ans, devfund_addresses as dev_addrs
+import helpers
 
 keep_alive()
 
@@ -22,16 +23,20 @@ async def list_commands(cxt):
 @discord_client.command()
 async def balance(cxt, address):
   print('got command')
-  await cxt.send(kaspa.get_balance(address))
+  await cxt.send(ans.BALANCE(kaspa.get_balance(address)))
 
 @discord_client.command()
 async def devfund(cxt):
+  balances = kaspa.get_balances(
+    dev_addrs.MINING_ADDR,
+    dev_addrs.DONATION_ADDR
+    )
   await cxt.send(
-    ans.DEVFUND(
-        kaspa.get_balance(dev_addrs.MINING_ADDR),
-        kaspa.get_balance(dev_addrs.DONATION_ADDR)
-    )
-    )
+    helpers.post_process_messages(
+      ans.DEVFUND(*balances)
+      )
+  )
+
 @discord_client.command()
 async def hashrate(cxt):
   await cxt.send(str(kaspa.get_hashrate()))

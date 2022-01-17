@@ -34,6 +34,8 @@ class answers:
     devfund     : {devfund_addresses.DONATION_ADDR}
     
     '''
+    PREFACE = '''Thanks for using kaspabot!'''
+    APPENDIX =f'''please consider a donation towards the devfund @ {devfund_addresses.DONATION_ADDR}'''
     HELP = f'''
         ${commands.DEVFUND}:
         list addresses and balances associated with the devfund
@@ -92,7 +94,16 @@ class answers:
         '''
     
     DEVFUND = lambda mining_addr_value, donation_addr_value : f'''
-    'Donation addrs:'{devfund_addresses.DONATION_ADDR}     :   {donation_addr_value} KAS 
-    'Mining addrs:  '{devfund_addresses.MINING_ADDR}     :   {mining_addr_value} KAS
+    Donation addresses:
+      1) {devfund_addresses.DONATION_ADDR}
+        {donation_addr_value} KAS 
+    Mining addresses:
+      1) {devfund_addresses.MINING_ADDR} 
+        {mining_addr_value} KAS
+    ==========================================================
     TOTAL:  {mining_addr_value + donation_addr_value} KAS  
     '''
+
+    BALANCE = lambda balance : f'''```
+    {balance} KAS
+    ```'''

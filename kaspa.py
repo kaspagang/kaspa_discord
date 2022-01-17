@@ -5,24 +5,27 @@ import logging
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
-def get_balance(addr):
+def get_balances(*addrs):
   print('in balance')
   cli = RPCClient()
   cli.auto_connect(min_kaspad_version=ver(0,11,9), utxoindex=True)
   print('connected')
+  balances = list()
   try:
-    balance = cli.request('getBalanceByAddressRequest', {'address' : addr})
-    print(balance)
-    if not balance['getBalanceByAddressResponse'].values():
-      cli.close()
-      get_balance(addr)
-    balance = balance['getBalanceByAddressResponse']['balance']
+    for addr in addrs:
+      balance = cli.request('getBalanceByAddressRequest', {'address' : addr})
+      print(balance)
+      if not balance['getBalanceByAddressResponse'].values():
+        cli.close()
+        get_balances(*addrs)
+      balance = balance['getBalanceByAddressResponse']['balance']
+      balances.append(int(balance) / 100000000)
   except:
     cli.close()
-    get_balance(addr)
+    get_balances(*addrs)
   print(balance, 'kas')
   cli.close()
-  return int(balance) / 100000000
+  return balances
    
 def get_hashrate():
     try:
