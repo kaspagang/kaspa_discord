@@ -23,24 +23,27 @@ def normalize_hashrate(hashrate :int):
     return f'{round(hashrate/1_000_000_000_000_000_000, 2)} EH/s' #Exa
 
 def hashrate_to_int(str_hashrate : str):
-  if str_hashrate[-3:] == ' H/s':
+  str_hashrate = str_hashrate.replace(" ", "")
+  print(str_hashrate)
+  if str_hashrate[-4:] == 'KH/s':
     hash_digit = float(str_hashrate[:-4])
-    return hash_digit
-  elif str_hashrate[-4:] == 'KH/s':
-    hash_digit = float(str_hashrate[:-5])
     return hash_digit*1_000
   elif str_hashrate[-4:] == 'MH/s':
-    hash_digit = float(str_hashrate[:-5])
+    print(str_hashrate[:-4])
+    hash_digit = float(str_hashrate[:-4])
     return hash_digit*1_000_000
   elif str_hashrate[-4:] == 'GH/s':
-    hash_digit = float(str_hashrate[:-5])
+    hash_digit = float(str_hashrate[:-4])
     return hash_digit*1_000_000_000
   elif str_hashrate[-4:] == 'TH/s':
-    hash_digit = float(str_hashrate[:-5])
+    hash_digit = float(str_hashrate[:-4])
     return hash_digit*1_000_000_000_000
   elif str_hashrate[-4:] == 'PH/s':
-    hash_digit = float(str_hashrate[:-5])
+    hash_digit = float(str_hashrate[:-4])
     return hash_digit*1_000_000_000_000_000
-  elif str_hashrate[-4:] == 'ZH/s':
-    hash_digit = float(str_hashrate[:-5])
+  elif str_hashrate[-4:] == 'EH/s':
+    hash_digit = float(str_hashrate[:-4])
     return hash_digit*1_000_000_000_000_000_000
+  elif str_hashrate[-3:] == 'H/s':
+    hash_digit = float(str_hashrate[:-3])
+    return hash_digit
