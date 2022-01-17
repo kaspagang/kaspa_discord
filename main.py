@@ -22,7 +22,7 @@ async def on_ready():
 async def balance(cxt, address):
   '''get balance of address'''
   try:
-    await cxt.send(ans.BALANCE(*kaspa.get_balance(address)))
+    await cxt.send(ans.BALANCE(*kaspa.get_balances(address)))
   except:
     await cxt.send(ans.FAILED)
 

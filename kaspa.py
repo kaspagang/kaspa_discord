@@ -1,4 +1,3 @@
-from defines import answers as ans
 from kaspy.kaspa_clients import RPCClient
 from kaspy.utils.version_comparer import version as ver 
 import logging 
@@ -21,7 +20,6 @@ def get_balances(*addrs):
   except:
     cli.close()
     get_balances(*addrs)
-  print(balance, 'kas')
   cli.close()
   return balances
    
