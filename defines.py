@@ -25,7 +25,8 @@ class answers:
     Kaspa is currently running @ {norm_hashrate}''' 
     
     USEFUL_LINKS = '''
-    'Kaspa website'(https://kaspanet.org/)
+    Kaspa website: 
+      https://kaspanet.org/
     Source code: 
       https://github.com/kaspanet/kaspad
     Quick start guide:
