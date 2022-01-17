@@ -16,18 +16,20 @@ discord_client = commands.Bot(command_prefix='$')
 @discord_client.event
 async def on_ready():
   print(f'running {discord_client.user}...')
-
+'''
 @discord_client.command()
 async def command_details(cxt):
   await cxt.send(ans.HELP)
+'''
 
 @discord_client.command()
 async def balance(cxt, address):
-  print('got command')
+  '''get balance of address'''
   await cxt.send(ans.BALANCE(kaspa.get_balance(address)))
 
 @discord_client.command()
 async def devfund(cxt):
+  '''Display devfund balance'''
   balances = kaspa.get_balances(
     dev_addrs.MINING_ADDR,
     dev_addrs.DONATION_ADDR
@@ -40,6 +42,7 @@ async def devfund(cxt):
 
 @discord_client.command()
 async def hashrate(cxt):
+  '''Get network hashrate'''
   hashrate = kaspa.get_hashrate()
   await cxt.send(
     helpers.post_process_messages(
@@ -51,6 +54,7 @@ async def hashrate(cxt):
 
 @discord_client.command()
 async def useful_links(cxt):
+  '''curtailed list of useful links'''
   await cxt.send(helpers.post_process_messages(ans.USEFUL_LINKS))
 
 @discord_client.command()
@@ -63,6 +67,7 @@ async def mining_reward(cxt, own_hashrate):
 
 @discord_client.command()
 async def suggest(cxt, *suggestion):
+  '''send a suggestion to kasperbot'''
   dev = await discord_client.fetch_user(DEV_ID)
   await dev.send(' '.join(suggestion))
   await cxt.send(helpers.post_process_messages(ans.SUGGESTION))
