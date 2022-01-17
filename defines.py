@@ -54,18 +54,15 @@ class answers:
       1) {devfund_addresses.MINING_ADDR} 
         {mining_addr_value} KAS
     ==========================================================
-    TOTAL:  {mining_addr_value + donation_addr_value} KAS  
-    '''
+    TOTAL:  {mining_addr_value + donation_addr_value} KAS'''
 
     BALANCE = lambda balance : f'''
-    {balance} KAS
-    '''
+    {balance} KAS'''
 
     SUGGESTION = f'''Thanks for your suggestion!'''
 
     HASHRATE = lambda norm_hashrate : f'''
-    Kaspa is currently running @ {norm_hashrate}    
-    ''' 
+    Kaspa is currently running @ {norm_hashrate}''' 
     USEFUL_LINKS = '''
     'Kaspa website'(https://kaspanet.org/)
     Source code: 
@@ -95,8 +92,7 @@ class answers:
     Cpu-miner:
       https://github.com/elichai/kaspa-miner/releases
     Gpu-miner:
-      https://github.com/tmrlvi/kaspa-miner/releases
-    '''
+      https://github.com/tmrlvi/kaspa-miner/releases'''
 
     MINING_CALC = lambda network_percent : f'''
     {500*network_percent} KAS/sec
@@ -105,8 +101,7 @@ class answers:
     {500*60*60*24*network_percent} KAS/day
     {500*60*60*24*7*network_percent} KAS/week
     {500*60*60*24*7*(365.25/12)*network_percent} KAS/month
-    {500*60*60*24*7*365.25*network_percent} KAS/year
-  '''
+    {500*60*60*24*7*365.25*network_percent} KAS/year'''
 
 #for possible future:
 
@@ -149,6 +144,4 @@ class answers:
         are respected  
         
         3) large deviations from mean are excluded as trolling
-
-
 '''

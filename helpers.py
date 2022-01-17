@@ -4,7 +4,7 @@ def adjoin_messages(*msgs):
   return f"```{nl.join(msgs)}```"
 
 def post_process_messages(*msgs):
-  return adjoin_messages(ans.PREFACE, *msgs, ans.APPENDIX)
+  return adjoin_messages(*msgs)
 
 def normalize_hashrate(hashrate :int):
   if hashrate < 1_000: #kilo
