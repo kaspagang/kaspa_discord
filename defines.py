@@ -1,3 +1,10 @@
+import os
+
+DEV_ID = os.environ['DEV_ID']
+TOKEN = os.environ['TOKEN']
+HOST_IP = os.environ['HOST_IP']
+HOST_PORT = os.environ['HOST_PORT']
+
 class devfund_addresses:
     MINING_ADDR = 'kaspa:pzhh76qc82wzduvsrd9xh4zde9qhp0xc8rl7qu2mvl2e42uvdqt75zrcgpm00'
     DONATION_ADDR = 'kaspa:precqv0krj3r6uyyfa36ga7s0u9jct0v4wg8ctsfde2gkrsgwgw8jgxfzfc98'
@@ -63,4 +70,5 @@ class answers:
     {500*60*60*24*network_percent} KAS/day
     {500*60*60*24*7*network_percent} KAS/week
     {500*60*60*24*(365.25/12)*network_percent} KAS/month
-    {500*60*60*24*365.25*network_percent} KAS/year'''
+    {500*60*60*24*365.25*network_percent} KAS/year
+    For info type: $help mining_reward'''
