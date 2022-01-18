@@ -1,12 +1,19 @@
+from random import randrange
+from defines import answers as ans
 def adjoin_messages(*msgs):
-  nl = '\n\n'
+  sep = "  ==================================================================================="
+  nl = f'\n{sep}'
   return f"```{nl.join(msgs)}```"
 
 def post_process_messages(*msgs):
+  draw = randrange(0, 19)
+  print(draw)
+  if draw == 20: # deactivate for now
+    msgs = (*msgs, ans.DONATION_ADDRS,)
   return adjoin_messages(*msgs)
 
 def normalize_hashrate(hashrate :int):
-  if hashrate < 1_000: #kilo
+  if hashrate < 1_000: #
     return f'{round(hashrate, 2)} H/s' #Hash
   elif hashrate < 1_000_000:
     return f'{round(hashrate/1_000, 2)} KH/s' #Kilo

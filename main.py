@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from keep_alive import keep_alive
 import kaspa
+import random
 from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN)
 import helpers
 from requests import get
@@ -26,7 +27,8 @@ async def balance(cxt, address):
         )
       )
     )
-  except:
+  except Exception as e:
+    print(e)
     await cxt.send(
       helpers.post_process_messages(ans.FAILED)
       )
@@ -44,7 +46,8 @@ async def devfund(cxt):
         ans.DEVFUND(*balances)
         )
     )
-  except:
+  except Exception as e:
+    print(e)
     await cxt.send(
       helpers.post_process_messages(ans.FAILED)
       )
@@ -61,7 +64,8 @@ async def hashrate(cxt):
           )
         )
       )
-  except:
+  except Exception as e:
+    print(e)
     await cxt.send(
       helpers.post_process_messages(ans.FAILED)
       )
@@ -71,7 +75,8 @@ async def useful_links(cxt):
   '''List of useful links'''
   try:
     await cxt.send(helpers.post_process_messages(ans.USEFUL_LINKS))
-  except:
+  except Exception as e:
+    print(e)
     await cxt.send(
       helpers.post_process_messages(ans.FAILED)
       )
@@ -91,7 +96,8 @@ async def mining_reward(cxt, own_hashrate):
     own_hashrate = helpers.hashrate_to_int(own_hashrate)
     percent_of_network = own_hashrate/network_hashrate
     await cxt.send(helpers.post_process_messages(ans.MINING_CALC(percent_of_network)))
-  except:
+  except Exception as e:
+    print(e)
     await cxt.send(
       helpers.post_process_messages(ans.FAILED)
       )
@@ -103,7 +109,8 @@ async def suggest(cxt, *suggestion):
     dev = await discord_client.fetch_user(DEV_ID)
     await dev.send(' '.join(suggestion))
     await cxt.send(helpers.post_process_messages(ans.SUGGESTION))
-  except:
+  except Exception as e:
+    print(e)
     await cxt.send(
       helpers.post_process_messages(ans.FAILED)
       )
@@ -114,7 +121,8 @@ async def joke(cxt):
   try:
     joke = get('https://v2.jokeapi.dev/joke/Programming?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&format=txt').text
     await cxt.send(helpers.post_process_messages(joke))
-  except:
+  except Exception as e:
+    print(e)
     await cxt.send(
       helpers.post_process_messages(ans.FAILED)
       )
@@ -124,9 +132,40 @@ async def my_source_code(cxt):
   '''source code for reference'''
   try:
     await cxt.send('https://github.com/kaspagang/kaspa_discord')
-  except:
+  except Exception as e:
+    print(e)
     await cxt.send(
       helpers.post_process_messages(ans.FAILED)
       )
-  
+
+@discord_client.command()
+async def search_wiki(cxt, *queries):
+  '''query the kaspa wiki with search terms'''
+  try:
+    j = '+'
+    await cxt.send(
+      f"https://kaspawiki.net/index.php?search={j.join(queries)}"
+    )
+  except Exception as e:
+    print(e)
+    await cxt.send(
+      helpers.post_process_messages(ans.FAILED)
+      )
+
+@discord_client.command()
+async def donate(cxt):
+  '''Tips are welcome! - Displays donation addresses'''
+  try:
+    await cxt.send(helpers.post_process_messages(
+        (
+      ans.DONATION_ADDRS
+        )
+      )
+    )
+  except Exception as e:
+    print(e)
+    await cxt.send(
+      helpers.post_process_messages(ans.FAILED)
+      )
+
 discord_client.run(TOKEN)
