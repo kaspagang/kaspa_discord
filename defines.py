@@ -1,21 +1,37 @@
 import os
+from helpers import normalize_hashrate
 
 DEV_ID = os.environ['DEV_ID']
 TOKEN = os.environ['TOKEN']
 HOST_IP = os.environ['HOST_IP']
 HOST_PORT = os.environ['HOST_PORT']
 
+class kaspa_constants:
+  TOTAL_COIN_SUPPLY = 28_500_000_000
+
 class devfund_addresses:
     MINING_ADDR = 'kaspa:pzhh76qc82wzduvsrd9xh4zde9qhp0xc8rl7qu2mvl2e42uvdqt75zrcgpm00'
     DONATION_ADDR = 'kaspa:precqv0krj3r6uyyfa36ga7s0u9jct0v4wg8ctsfde2gkrsgwgw8jgxfzfc98'
 
 class kasper_addresses:
-  DONATION_ADDR = 'kaspa:qp33anhdnnsfzg474jd3s5csuaf0k9kn6cvy3pfcx9rnezak5qkhgskuztcum'
+    DONATION_ADDR = 'kaspa:qp33anhdnnsfzg474jd3s5csuaf0k9kn6cvy3pfcx9rnezak5qkhgskuztcum'
 
 class answers:
 
     FAILED = '''
   Could not process your command'''
+
+    DAG_STATS =lambda stats : f'''
+    Hashrate      :   {normalize_hashrate(stats['hashrate'])}
+    Difficulty    :   {stats['difficulty']}
+    DAA score     :   {stats['daa_score']}
+    Tip Hashes    :   {stats['tip_hashes']}'''
+
+    COIN_STATS = lambda circulating_coins : f'''
+    Circulating supply  : {circulating_coins}
+    Total supply        : {kaspa_constants.TOTAL_COIN_SUPPLYtal_coins}
+    Percent mined       : {circulating_coins/kaspa_constants.TOTAL_COIN_SUPPLY}
+    '''
     
     DEVFUND = lambda mining_addr_value, donation_addr_value : f'''
   =======================================================================

@@ -6,6 +6,7 @@ import random
 from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN)
 import helpers
 from requests import get
+from replit import db
 
 keep_alive()
 
@@ -162,6 +163,21 @@ async def donate(cxt):
         )
       )
     )
+  except Exception as e:
+    print(e)
+    await cxt.send(
+      helpers.post_process_messages(ans.FAILED)
+      )
+
+@discord_client.command()
+async def dag_info(cxt):
+  '''Query dag information'''
+  try:
+    await cxt.send(helpers.post_process_messages(
+        (
+      ans.DAG_STATS(kaspa.get_stats())
+        )
+        ))
   except Exception as e:
     print(e)
     await cxt.send(
