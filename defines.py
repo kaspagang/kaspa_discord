@@ -1,10 +1,11 @@
 import os
-from helpers import normalize_hashrate
 
 DEV_ID = os.environ['DEV_ID']
 TOKEN = os.environ['TOKEN']
 HOST_IP = os.environ['HOST_IP']
 HOST_PORT = os.environ['HOST_PORT']
+
+DEL_INTERVAL = 20
 
 class kaspa_constants:
   TOTAL_COIN_SUPPLY = 28_500_000_000
@@ -22,7 +23,7 @@ class answers:
   Could not process your command'''
 
     DAG_STATS =lambda stats : f'''
-    Hashrate      :   {normalize_hashrate(stats['hashrate'])}
+    Hashrate      :   {stats['hashrate']}
     Difficulty    :   {stats['difficulty']}
     DAA score     :   {stats['daa_score']}
     Tip Hashes    :   {stats['tip_hashes']}'''

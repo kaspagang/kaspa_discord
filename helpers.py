@@ -1,4 +1,5 @@
 from random import randrange
+from defines import DEL_INTERVAL
 #from defines import answers as ans
 def adjoin_messages(*msgs):
   sep = "  ==================================================================================="
@@ -11,6 +12,9 @@ def post_process_messages(*msgs):
   #if draw == 20: # deactivate for now
   #  msgs = (*msgs, ans.DONATION_ADDRS,)
   return adjoin_messages(*msgs)
+
+def get_delete_interval(args):
+    return None if 'keep' in args else DEL_INTERVAL
 
 def normalize_hashrate(hashrate :int):
   if hashrate < 1_000: #

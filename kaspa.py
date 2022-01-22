@@ -3,6 +3,7 @@ from kaspy.utils.version_comparer import version as ver
 import logging 
 import grpc
 from defines import HOST_IP, HOST_PORT
+from helpers import normalize_hashrate
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
@@ -90,7 +91,7 @@ def get_stats(use_dedicated_node=True, tries = 0):
     stats['tip_hashes'] = blockdag_info['tipHashes']
     stats['blocks_per_secound'] = blockdag_info['pastMedianTime']
     stats['difficulty'] = blockdag_info['difficulty']
-    stats['hashrate'] = int(stats['difficulty'])*2
+    stats['hashrate'] = normalize_hashrate(int(stats['difficulty'])*2)
     stats['daa_score'] = blockdag_info['virtualDaaScore']
     print(stats)
   except (Exception, grpc.RpcError) as e:
