@@ -61,6 +61,12 @@ class answers:
     HASHRATE = lambda norm_hashrate : f'''
   Kaspa is currently running @ {norm_hashrate}''' 
     
+    CONSIDER_DONATION = f'''
+    Please consider a donation:
+    Kasper : {kasper_addresses.DONATION_ADDR}
+    Devfund: {devfund_addresses.DONATION_ADDR}
+    '''
+
     USEFUL_LINKS = '''
   Kaspa website: 
     https://kaspanet.org/
@@ -103,6 +109,6 @@ class answers:
   {500*60*60*24*365.25*network_percent} KAS/year'''
 
     DONATION_ADDRS = f'''
-  Please consider a tip towards:
-    • Kasperbot : {kasper_addresses.DONATION_ADDR}
-    • Devfund   : {devfund_addresses.DONATION_ADDR}'''
+Please consider a tip towards:
+• Kasperbot : {kasper_addresses.DONATION_ADDR}
+• Devfund   : {devfund_addresses.DONATION_ADDR}'''
