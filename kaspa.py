@@ -93,7 +93,6 @@ def get_stats(use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
     stats['difficulty'] = blockdag_info['difficulty']
     stats['hashrate'] = normalize_hashrate(int(stats['difficulty'])*2)
     stats['daa_score'] = blockdag_info['virtualDaaScore']
-    print(stats)
   except (Exception, grpc.RpcError) as e:
     cli.close()
   return stats

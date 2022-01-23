@@ -58,8 +58,6 @@ def hashrate_to_int(str_hashrate : str):
     hash_digit = float(str_hashrate[:-3])
     return hash_digit
 
-def time_message(sleep):
-  intervals = sleep/12
-  for i, interval in enumerate(intervals):
-    yield f':clock{i+1}:'
-    time.sleep(interval)
+def circulating_supply(daa_score):
+  return daa_score*500
+  

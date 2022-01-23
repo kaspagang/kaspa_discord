@@ -1,9 +1,10 @@
 import discord
+import asyncio
 from discord.ext import commands
 from keep_alive import keep_alive
 import kaspa
 import random
-from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN, SER_TO_ALLOWED_CHANS, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB)
+from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN, SER_TO_ALLOWED_CHANS, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB, DISCLAIMER_INTERVAL)
 import helpers
 from requests import get
 import grpc
@@ -15,6 +16,28 @@ discord_client = commands.Bot(command_prefix='$')
 @discord_client.event
 async def on_ready():
   print(f'running {discord_client.user}...')
+  discord_client.loop.create_task(send_disclaimer())
+
+async def send_disclaimer():
+  trade_chan = discord_client.get_channel(910316340735262720)
+  while True:
+    trade_chan = discord_client.get_channel(910316340735262720)
+    if random.random() < CALL_FOR_DONATION_PROB:
+      msg = helpers.adjoin_messages(
+        None, 
+        True, 
+        ans.DISCLAIMER,
+        ans.DONATION_ADDRS
+        )
+    else:
+      msg = helpers.adjoin_messages(
+        None, 
+        True, 
+        ans.DISCLAIMER
+        )
+    await asyncio.sleep(DISCLAIMER_INTERVAL)
+    await trade_chan.send(msg)
+
 
 @discord_client.command()
 async def balance(cxt, address, *args):
@@ -96,7 +119,7 @@ async def suggest(cxt, *suggestion):
     suggestion = "SUGGESTION: " + ' '.join(suggestion)
     await _send(cxt, suggestion, here, blockify = False, dm_dev = True)
     thanks = ans.SUGGESTION
-    await _send(cxt, thanks, here, dm_dev = True)
+    await _send(cxt, thanks, here)
   except (Exception, grpc.RpcError) as e:
     await _process_exception(cxt, e, here)
 
@@ -169,6 +192,19 @@ def _post_process_msg(cxt, msg, blockify=True):
       msg
       )
 
+@discord_client.command()
+async def coin_supply(cxt, *args):
+  '''Get current coin supply'''
+  here = True if 'here' in args else False
+  try:
+    stats = kaspa.get_stats()
+    circ_supply = int(stats['daa_score'])*500
+    msg = ans.COIN_STATS(circ_supply)
+    await _send(cxt, msg, here)
+  except (Exception, grpc.RpcError) as e:
+    await _process_exception(cxt, e, here)
+
+
 async def _process_exception(cxt, e, here):
   print(e)
   recv_msg = str(cxt.message.content)
@@ -178,10 +214,10 @@ async def _process_exception(cxt, e, here):
 async def _send(cxt, msg, here, blockify=True, dm_dev=False, dm_user=False):
   msg = _post_process_msg(cxt, msg, blockify)
   if dm_dev:
-    dev_chan = discord_client.get_user(int(DEV_ID))
+    dev_chan = await discord_client.fetch_user(int(DEV_ID))
     await dev_chan.send(msg)
   elif dm_user:
-    user_chan = discord_client.get_user(int(cxt.author.id))
+    user_chan = await discord_client.fetch_user(int(cxt.author.id))
     await user_chan.send(msg)
   elif isinstance(cxt.channel, discord.channel.DMChannel): #is dm
     await cxt.send(msg)

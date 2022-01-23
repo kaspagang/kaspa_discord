@@ -26,6 +26,8 @@ TRY_DEDICATED_NODE = False
 
 CALL_FOR_DONATION_PROB = 1/19 # The more work I do, the higher the chance (:
 
+DISCLAIMER_INTERVAL = 60*60
+
 class kaspa_constants:
   TOTAL_COIN_SUPPLY = 28_500_000_000
 
@@ -37,6 +39,9 @@ class kasper_addresses:
     DONATION_ADDR = 'kaspa:qp33anhdnnsfzg474jd3s5csuaf0k9kn6cvy3pfcx9rnezak5qkhgskuztcum'
 
 class answers:
+    DISCLAIMER = '''Disclaimer:
+  
+  This is a kind reminder that #trade channel is not moderated by the server mods, core devs, treasurers or any other constituents of the Kaspa community. This channel was created to accommodate traders which bogged down the community channel, having created it does not impose any responsibility for the actions of any buyer, seller, escrow service etc. on any particular community member. Please be mindful of that and careful with your money.'''
 
     FAILED = lambda recv_msg : f'''
   Could not process: {recv_msg}'''
@@ -49,9 +54,8 @@ class answers:
 
     COIN_STATS = lambda circulating_coins : f'''
     Circulating supply  : {circulating_coins}
-    Total supply        : {kaspa_constants.TOTAL_COIN_SUPPLYtal_coins}
-    Percent mined       : {circulating_coins/kaspa_constants.TOTAL_COIN_SUPPLY}
-    '''
+    Total supply        : {kaspa_constants.TOTAL_COIN_SUPPLY}
+    Percent mined       : {round(circulating_coins/kaspa_constants.TOTAL_COIN_SUPPLY*100, 2)}%'''
     
     DEVFUND = lambda mining_addr_value, donation_addr_value : f'''
   =======================================================================
