@@ -6,7 +6,7 @@ import random
 from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN, SER_TO_ALLOWED_CHANS, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB)
 import helpers
 from requests import get
-
+import grpc
 keep_alive()
 
 discord_client = discord.Client()
@@ -21,7 +21,7 @@ async def balance(cxt, address, *args):
   '''Get balance of address'''
   here = True if 'here' in args else False
   try:
-    balances = kaspa.get_balances(adress)
+    balances = kaspa.get_balances(address)
     msg = ans.BALANCE(*balances)
     await _send(cxt, msg, here)
   except (Exception, grpc.RpcError) as e:
@@ -31,7 +31,6 @@ async def balance(cxt, address, *args):
 @discord_client.command()
 async def devfund(cxt, *args):
   '''Display devfund balance'''
-  del_interval = helpers.get_delete_interval(args)
   here = True if 'here' in args else False
   try:
     balances = kaspa.get_balances(
@@ -92,12 +91,12 @@ async def mining_reward(cxt, own_hashrate, *args):
 @discord_client.command()
 async def suggest(cxt, *suggestion):
   '''Send a suggestion for the development of kasperbot'''
-  here = True if 'here' == args[-1] else False
+  here = True if 'here' == suggestion[-1] else False
   try:
     suggestion = "SUGGESTION: " + ' '.join(suggestion)
-    await _send(cxt, suggestion, blockify = False, dm_dev = True)
+    await _send(cxt, suggestion, here, blockify = False, dm_dev = True)
     thanks = ans.SUGGESTION
-    await _send(cxt, thanks, here, dm_user = True)
+    await _send(cxt, thanks, here, dm_dev = True)
   except (Exception, grpc.RpcError) as e:
     await _process_exception(cxt, e, here)
 
@@ -137,10 +136,10 @@ async def search_wiki(cxt, *queries):
 @discord_client.command()
 async def donate(cxt, *args):
   '''Tips are welcome! - Displays donation addresses'''
-  here = True if here in args else False
+  here = True if 'here' in args else False
   try:
-    msg = ans.DONNATION_ADDRS
-    self._send(cxt, msg, here)
+    msg = ans.DONATION_ADDRS
+    await _send(cxt, msg, here)
   except (Exception, grpc.RpcError) as e:
     await _process_exception(cxt, e, here)
 
@@ -155,18 +154,18 @@ async def dag_info(cxt, *args):
   except (Exception, grpc.RpcError) as e:
     await _process_exception(cxt, e, here)
 
-async def _post_process_msg(cxt, msg, blockify=True):
+def _post_process_msg(cxt, msg, blockify=True):
   if random.random() < CALL_FOR_DONATION_PROB:
     return helpers.adjoin_messages(
       cxt.author.id,
-      blockify 
+      blockify, 
       msg,
       ans.DONATION_ADDRS
       )
   else:
     return helpers.adjoin_messages(
       cxt.author.id,
-      blockify
+      blockify,
       msg
       )
 
@@ -174,15 +173,15 @@ async def _process_exception(cxt, e, here):
   print(e)
   recv_msg = str(cxt.message.content)
   msg = ans.FAILED(recv_msg)
-  await _send(cxt, msg)
+  await _send(cxt, msg, here)
 
-async def _send(cxt, msg, here, blockify=True dm_dev=False, dm_user=False):
-  msg = self._post_process_messages(msg, blockify)
+async def _send(cxt, msg, here, blockify=True, dm_dev=False, dm_user=False):
+  msg = _post_process_msg(cxt, msg, blockify)
   if dm_dev:
-    dev_chan = discord_client.get_channel(DEV_ID)
+    dev_chan = discord_client.get_user(int(DEV_ID))
     await dev_chan.send(msg)
   elif dm_user:
-    user_chan = discord_client.get_channel(cxt.author.id)
+    user_chan = discord_client.get_user(int(cxt.author.id))
     await user_chan.send(msg)
   elif isinstance(cxt.channel, discord.channel.DMChannel): #is dm
     await cxt.send(msg)

@@ -2,7 +2,7 @@ from kaspy.kaspa_clients import RPCClient
 from kaspy.utils.version_comparer import version as ver 
 import logging 
 import grpc
-from defines import HOST_IP, HOST_PORT, 
+from defines import HOST_IP, HOST_PORT, TRY_DEDICATED_NODE 
 from helpers import normalize_hashrate
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
