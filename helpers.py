@@ -1,17 +1,18 @@
 from random import randrange
+import time
 from defines import DEL_INTERVAL
 from defines import answers as ans
-def adjoin_messages(*msgs):
-  sep = "  ==============================================================================="
-  nl = f'\n{sep}'
-  return f"```{nl.join(msgs)}```"
 
-def post_process_messages(*msgs):
-  draw = randrange(0, 19)
-  print(draw)
-  if draw == 7:
-    msgs = (*msgs, ans.DONATION_ADDRS)
-  return adjoin_messages(*msgs)
+def adjoin_messages(user_id, blockify = True, *msgs):
+  sep="  ==============================================================================="
+  nl = f'\n{sep}'
+  if blockify:
+    if user_id is None:
+      return f"```{nl.join(msgs)}```"
+    return f"<@{user_id}>```{nl.join(msgs)}```"
+  elif not blockify:
+    return f"{nl.join(msgs)}"
+  return f"<@{user_id}>```{nl.join(msgs)}```"
 
 def get_delete_interval(args):
     return None if 'keep' in args else DEL_INTERVAL
@@ -56,3 +57,9 @@ def hashrate_to_int(str_hashrate : str):
   elif str_hashrate[-3:] == 'H/s':
     hash_digit = float(str_hashrate[:-3])
     return hash_digit
+
+def time_message(sleep):
+  intervals = sleep/12
+  for i, interval in enumerate(intervals):
+    yield f':clock{i+1}:'
+    time.sleep(interval)

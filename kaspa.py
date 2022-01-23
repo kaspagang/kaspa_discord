@@ -2,12 +2,12 @@ from kaspy.kaspa_clients import RPCClient
 from kaspy.utils.version_comparer import version as ver 
 import logging 
 import grpc
-from defines import HOST_IP, HOST_PORT
+from defines import HOST_IP, HOST_PORT, 
 from helpers import normalize_hashrate
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
-def get_balances(*addrs, use_dedicated_node=True, tries = 0):
+def get_balances(*addrs, use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
   if tries == 3:
     raise Exception
   cli = RPCClient()
@@ -33,7 +33,7 @@ def get_balances(*addrs, use_dedicated_node=True, tries = 0):
   cli.close()
   return balances
    
-def get_hashrate(use_dedicated_node=True, tries = 0):
+def get_hashrate(use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
   if tries == 3:
     raise Exception
   cli = RPCClient()
@@ -69,7 +69,7 @@ def get_circulating_coins(use_dedicated_node=True, tries=0):
     get_hashrate(use_dedicated_node=False, tries=tries+1)
   return circulating_supply
 
-def get_stats(use_dedicated_node=True, tries = 0):
+def get_stats(use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
   if tries == 3:
     raise Exception
   cli = RPCClient()

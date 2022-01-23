@@ -5,7 +5,26 @@ TOKEN = os.environ['TOKEN']
 HOST_IP = os.environ['HOST_IP']
 HOST_PORT = os.environ['HOST_PORT']
 
-DEL_INTERVAL = 20
+DEL_INTERVAL = 60
+ALLOWED_SERVERS = [599153230659846165]
+
+SER_TO_ALLOWED_CHANS = {
+  599153230659846165 :{ # kaspa
+    934815196361404467
+  },
+  932389256838643755 : [ #test server
+    934753516575158282
+    ]
+  }
+
+SER_TO_ANSWER_CHAN = {
+  599153230659846165 : 934815196361404467, #kaspa
+  932389256838643755 : 934753516575158282, #test server
+}
+
+TRY_DEDICATED_NODE = False
+
+CALL_FOR_DONATION_PROB = 1/19 # The more work I do, the higher the chance (:
 
 class kaspa_constants:
   TOTAL_COIN_SUPPLY = 28_500_000_000
@@ -19,8 +38,8 @@ class kasper_addresses:
 
 class answers:
 
-    FAILED = '''
-  Could not process your command'''
+    FAILED = lambda recv_msg : f'''
+  Could not process: {recv_msg}'''
 
     DAG_STATS =lambda stats : f'''
     Hashrate      :   {stats['hashrate']}
@@ -110,5 +129,5 @@ class answers:
 
     DONATION_ADDRS = f'''
 Please consider a tip towards:
-• Kasperbot : {kasper_addresses.DONATION_ADDR}
-• Devfund   : {devfund_addresses.DONATION_ADDR}'''
+• Kasperbot: {kasper_addresses.DONATION_ADDR}
+• Devfund  : {devfund_addresses.DONATION_ADDR}'''
