@@ -24,9 +24,14 @@ SER_TO_ANSWER_CHAN = {
 
 TRY_DEDICATED_NODE = False
 
-CALL_FOR_DONATION_PROB = 1/19 # The more work I do, the higher the chance (:
+CALL_FOR_DONATION_PROB = 1/25 # The more work I do, the higher the chance (:
 
 DISCLAIMER_INTERVAL = 60*60
+
+##channels##
+
+TRADE_OFFER_CHAN = 910316340735262720
+DEVFUND_CHAN = 922204606946234398
 
 class kaspa_constants:
   TOTAL_COIN_SUPPLY = 28_500_000_000
@@ -45,6 +50,8 @@ class answers:
 
     FAILED = lambda recv_msg : f'''
   Could not process: {recv_msg}'''
+
+    SUCCESS = f'''SUCCESS!!''' # for test command
 
     DAG_STATS =lambda stats : f'''
     Hashrate      :   {stats['hashrate']}
@@ -132,6 +139,6 @@ class answers:
   {500*60*60*24*365.25*network_percent} KAS/year'''
 
     DONATION_ADDRS = f'''
-Please consider a tip towards:
+Please consider a donation towards:
 • Kasperbot: {kasper_addresses.DONATION_ADDR}
 • Devfund  : {devfund_addresses.DONATION_ADDR}'''

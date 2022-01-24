@@ -4,7 +4,7 @@ from discord.ext import commands
 from keep_alive import keep_alive
 import kaspa
 import random
-from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN, SER_TO_ALLOWED_CHANS, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB, DISCLAIMER_INTERVAL)
+from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN, SER_TO_ALLOWED_CHANS, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB, DISCLAIMER_INTERVAL, TRADE_OFFER_CHAN, DEVFUND_CHAN)
 import helpers
 from requests import get
 import grpc
@@ -16,28 +16,61 @@ discord_client = commands.Bot(command_prefix='$')
 @discord_client.event
 async def on_ready():
   print(f'running {discord_client.user}...')
-  discord_client.loop.create_task(send_disclaimer())
+  discord_client.loop.create_task(send_intermittently())
 
-async def send_disclaimer():
-  trade_chan = discord_client.get_channel(910316340735262720)
+## intermittent posts ##
+
+async def send_intermittently():
+  i = 1
   while True:
-    trade_chan = discord_client.get_channel(910316340735262720)
-    if random.random() < CALL_FOR_DONATION_PROB:
-      msg = helpers.adjoin_messages(
-        None, 
-        True, 
-        ans.DISCLAIMER,
-        ans.DONATION_ADDRS
-        )
-    else:
-      msg = helpers.adjoin_messages(
-        None, 
-        True, 
-        ans.DISCLAIMER
-        )
     await asyncio.sleep(DISCLAIMER_INTERVAL)
-    await trade_chan.send(msg)
+    if i % 1 == 0: # every hour
+      await trade_disclaimer()
+    if i % 8 == 0: # every 8 hours 
+      await devfund_update()
+    i += 1
+    
+async def devfund_update():
+  devfund_chan = discord_client.get_channel(DEVFUND_CHAN)
+  balances = kaspa.get_balances(
+      dev_addrs.MINING_ADDR,
+      dev_addrs.DONATION_ADDR,
+      )
+  if random.random() < CALL_FOR_DONATION_PROB:
+    msg = helpers.adjoin_messages(
+      None, 
+      True, 
+      ans.DEVFUND(*balances),
+      ans.DONATION_ADDRS
+      )
+  else:
+    msg = helpers.adjoin_messages(
+      None, 
+      True, 
+      ans.DEVFUND(*balances)
+      )
+  await devfund_chan.send(msg)
 
+
+async def trade_disclaimer():
+  trade_chan = discord_client.get_channel(TRADE_OFFER_CHAN)
+  if random.random() < CALL_FOR_DONATION_PROB:
+    msg = helpers.adjoin_messages(
+      None, 
+      True, 
+      ans.DISCLAIMER,
+      ans.DONATION_ADDRS
+      )
+  else:
+    msg = helpers.adjoin_messages(
+      None, 
+      True, 
+      ans.DISCLAIMER
+      )
+  await trade_chan.send(msg)
+
+
+## commands ###
 
 @discord_client.command()
 async def balance(cxt, address, *args):
@@ -177,6 +210,33 @@ async def dag_info(cxt, *args):
   except (Exception, grpc.RpcError) as e:
     await _process_exception(cxt, e, here)
 
+@discord_client.command()
+async def coin_supply(cxt, *args):
+  '''Get current coin supply'''
+  here = True if 'here' in args else False
+  try:
+    stats = kaspa.get_stats()
+    circ_supply = int(stats['daa_score'])*500
+    msg = ans.COIN_STATS(circ_supply)
+    await _send(cxt, msg, here)
+  except (Exception, grpc.RpcError) as e:
+    await _process_exception(cxt, e, here)
+
+@discord_client.command(hidden=True)
+async def test(cxt, *args):
+  '''test command'''
+  here = True if 'here' in args else False
+  try:
+    msg = ans.SUCCESS
+    if 'fail' in args:
+      raise Exception('intentional fail')
+    await _send(cxt, msg, here)
+  except (Exception, grpc.RpcError) as e:
+    await _process_exception(cxt, e, here)
+
+
+## processing ###
+
 def _post_process_msg(cxt, msg, blockify=True):
   if random.random() < CALL_FOR_DONATION_PROB:
     return helpers.adjoin_messages(
@@ -192,24 +252,13 @@ def _post_process_msg(cxt, msg, blockify=True):
       msg
       )
 
-@discord_client.command()
-async def coin_supply(cxt, *args):
-  '''Get current coin supply'''
-  here = True if 'here' in args else False
-  try:
-    stats = kaspa.get_stats()
-    circ_supply = int(stats['daa_score'])*500
-    msg = ans.COIN_STATS(circ_supply)
-    await _send(cxt, msg, here)
-  except (Exception, grpc.RpcError) as e:
-    await _process_exception(cxt, e, here)
-
-
 async def _process_exception(cxt, e, here):
   print(e)
   recv_msg = str(cxt.message.content)
   msg = ans.FAILED(recv_msg)
   await _send(cxt, msg, here)
+
+## routing ##
 
 async def _send(cxt, msg, here, blockify=True, dm_dev=False, dm_user=False):
   msg = _post_process_msg(cxt, msg, blockify)
