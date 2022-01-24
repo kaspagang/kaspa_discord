@@ -4,6 +4,12 @@ DEV_ID = os.environ['DEV_ID']
 TOKEN = os.environ['TOKEN']
 HOST_IP = os.environ['HOST_IP']
 HOST_PORT = os.environ['HOST_PORT']
+DONATOR1 = os.environ['DONATOR1']
+
+DONATORS = [
+  DONATOR1,
+  DEV_ID #for testing
+]
 
 DEL_INTERVAL = 60
 ALLOWED_SERVERS = [599153230659846165]
@@ -24,7 +30,7 @@ SER_TO_ANSWER_CHAN = {
 
 TRY_DEDICATED_NODE = False
 
-CALL_FOR_DONATION_PROB = 1/25 # The more work I do, the higher the chance (:
+CALL_FOR_DONATION_PROB = 1/27 # more reduction 
 
 DISCLAIMER_INTERVAL = 60*60
 

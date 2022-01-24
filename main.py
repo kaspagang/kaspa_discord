@@ -3,8 +3,9 @@ import asyncio
 from discord.ext import commands
 from keep_alive import keep_alive
 import kaspa
+import json
 import random
-from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN, SER_TO_ALLOWED_CHANS, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB, DISCLAIMER_INTERVAL, TRADE_OFFER_CHAN, DEVFUND_CHAN)
+from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN, SER_TO_ALLOWED_CHANS, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB, DISCLAIMER_INTERVAL, TRADE_OFFER_CHAN, DEVFUND_CHAN, DONATORS)
 import helpers
 from requests import get
 import grpc
@@ -239,11 +240,15 @@ async def test(cxt, *args):
 
 def _post_process_msg(cxt, msg, blockify=True):
   if random.random() < CALL_FOR_DONATION_PROB:
+    if str(cxt.author.id) in DONATORS:
+      appendage = get('https://complimentr.com/api').json()['compliment']
+    else:
+      appendage = ans.DONATION_ADDRS
     return helpers.adjoin_messages(
       cxt.author.id,
       blockify, 
       msg,
-      ans.DONATION_ADDRS
+      appendage
       )
   else:
     return helpers.adjoin_messages(
