@@ -46,13 +46,14 @@ async def send_intermittently():
     await asyncio.sleep(DISCLAIMER_INTERVAL)
     if i % 1 == 0: # every hour
       await trade_disclaimer()
+    await asyncio.sleep(5)
     if i % 8 == 0: # every 8 hours 
       await devfund_update()
     i += 1
     
 async def devfund_update():
   '''update on devfund every 8 hours'''
-  devfund_chan = discord_client.get_channel(DEVFUND_CHAN)
+  devfund_chan = await discord_client.fetch_channel(DEVFUND_CHAN)
   balances = kaspa.get_balances(
       dev_addrs.MINING_ADDR,
       dev_addrs.DONATION_ADDR,
@@ -75,7 +76,10 @@ async def devfund_update():
 
 async def trade_disclaimer():
   '''send disclaimer to trade channel every hour'''
-  trade_chan = discord_client.get_channel(TRADE_OFFER_CHAN)
+  trade_chan = await discord_client.fetch_channel(TRADE_OFFER_CHAN)
+  message = await trade_chan.fetch_message(trade_chan.last_message_id)
+  if message.author.id == discord_client.author.id:
+    pass
   if random.random() < CALL_FOR_DONATION_PROB:
     msg = helpers.adjoin_messages(
       None, 
