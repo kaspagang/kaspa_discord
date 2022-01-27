@@ -5,7 +5,7 @@ from keep_alive import keep_alive
 import kaspa
 import json
 import random
-from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN, SER_TO_ALLOWED_CHANS, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB, DISCLAIMER_INTERVAL, TRADE_OFFER_CHAN, DEVFUND_CHAN, DONATORS, VOTES_CHANS, VOTE_REACTIONS)
+from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN, SER_TO_ALLOWED_CHANS, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB, INTERVAL, TRADE_OFFER_CHANS, DEVFUND_CHANS, DONATORS, VOTES_CHANS, VOTE_REACTIONS, DONATE_APPENDAGE_REACTS, TRADE_DIS_INTERVALS, DEVFUND_UPDATE_INTERVALS)
 import helpers
 from requests import get
 import grpc
@@ -13,6 +13,8 @@ keep_alive()
 
 discord_client = discord.Client()
 discord_client = commands.Bot(command_prefix='$')
+
+## events ##
 
 @discord_client.event
 async def on_ready():
@@ -43,57 +45,69 @@ async def on_raw_reaction_add(payload):
 async def send_intermittently():
   i = 1
   while True:
-    await asyncio.sleep(DISCLAIMER_INTERVAL)
-    if i % 1 == 0: # every hour
+    await asyncio.sleep(INTERVAL)
+    if i % TRADE_DIS_INTERVALS == 0:
       await trade_disclaimer()
     await asyncio.sleep(5)
-    if i % 8 == 0: # every 8 hours 
+    if i % DEVFUND_UPDATE_INTERVALS == 0: 
       await devfund_update()
     i += 1
     
 async def devfund_update():
   '''update on devfund every 8 hours'''
-  devfund_chan = await discord_client.fetch_channel(DEVFUND_CHAN)
-  balances = kaspa.get_balances(
-      dev_addrs.MINING_ADDR,
-      dev_addrs.DONATION_ADDR,
-      )
-  if random.random() < CALL_FOR_DONATION_PROB:
-    msg = helpers.adjoin_messages(
-      None, 
-      True, 
-      ans.DEVFUND(*balances),
-      ans.DONATION_ADDRS
-      )
-  else:
-    msg = helpers.adjoin_messages(
-      None, 
-      True, 
-      ans.DEVFUND(*balances)
-      )
-  await devfund_chan.send(msg)
+  for chan in DEVFUND_CHANS:
+    devfund_chan = await discord_client.fetch_channel(chan)
+    balances = kaspa.get_balances(
+        dev_addrs.MINING_ADDR,
+        dev_addrs.DONATION_ADDR,
+        )
+    if random.random() < CALL_FOR_DONATION_PROB:
+      msg = helpers.adjoin_messages(
+        None, 
+        True, 
+        ans.DEVFUND(*balances),
+        ans.DONATION_ADDRS
+        )
+      reactions = DONATE_APPENDAGE_REACTS
+    else:
+      msg = helpers.adjoin_messages(
+        None, 
+        True, 
+        ans.DEVFUND(*balances)
+        )
+      reactions = None
+    send_msg = await devfund_chan.send(msg)
+    if reactions:
+      for react in reactions:
+        await send_msg.add_reaction(react)
 
 
 async def trade_disclaimer():
   '''send disclaimer to trade channel every hour'''
-  trade_chan = await discord_client.fetch_channel(TRADE_OFFER_CHAN)
-  message = await trade_chan.fetch_message(trade_chan.last_message_id)
-  if message.author.id == discord_client.author.id:
-    pass
-  if random.random() < CALL_FOR_DONATION_PROB:
-    msg = helpers.adjoin_messages(
-      None, 
-      True, 
-      ans.DISCLAIMER,
-      ans.DONATION_ADDRS
-      )
-  else:
-    msg = helpers.adjoin_messages(
-      None, 
-      True, 
-      ans.DISCLAIMER
-      )
-  await trade_chan.send(msg)
+  for chan in TRADE_OFFER_CHANS:
+    trade_chan = await discord_client.fetch_channel(chan)
+    message = await trade_chan.fetch_message(trade_chan.last_message_id)
+    if message.author.id == discord_client.user.id:
+      pass
+    if random.random() < CALL_FOR_DONATION_PROB:
+      msg = helpers.adjoin_messages(
+        None, 
+        True, 
+        ans.DISCLAIMER,
+        ans.DONATION_ADDRS
+        )
+      reactions = DONATE_APPENDAGE_REACTS
+    else:
+      msg = helpers.adjoin_messages(
+        None, 
+        True, 
+        ans.DISCLAIMER
+        )
+      reactions = None
+    send_msg = await trade_chan.send(msg)
+    if reactions:
+      for react in reactions:
+        await send_msg.add_reaction(react)
 
 
 ## commands ###
@@ -254,11 +268,12 @@ async def coin_supply(cxt, *args):
 async def test(cxt, *args):
   '''test command'''
   here = True if 'here' in args else False
+  ghost = True if 'ghost' in args else False
   try:
     msg = ans.SUCCESS
     if 'fail' in args:
       raise Exception('intentional fail')
-    await _send(cxt, msg, here)
+    await _send(cxt, msg, here, dm_user=ghost)
   except (Exception, grpc.RpcError) as e:
     await _process_exception(cxt, e, here)
 
@@ -276,13 +291,13 @@ def _post_process_msg(cxt, msg, blockify=True):
       blockify,
       msg,
       appendage
-      )
+      ), DONATE_APPENDAGE_REACTS
   else:
     return helpers.adjoin_messages(
       cxt.author.id,
       blockify,
       msg
-      )
+      ), None
 
 async def _process_exception(cxt, e, here):
   print(e)
@@ -293,22 +308,25 @@ async def _process_exception(cxt, e, here):
 ## routing ##
 
 async def _send(cxt, msg, here, blockify=True, dm_dev=False, dm_user=False):
-  msg = _post_process_msg(cxt, msg, blockify)
+  msg, reactions = _post_process_msg(cxt, msg, blockify)
   if dm_dev:
     dev_chan = await discord_client.fetch_user(int(DEV_ID))
-    await dev_chan.send(msg)
+    send_msg = await dev_chan.send(msg)
   elif dm_user:
     user_chan = await discord_client.fetch_user(int(cxt.author.id))
-    await user_chan.send(msg)
+    send_msg = await user_chan.send(msg)
   elif isinstance(cxt.channel, discord.channel.DMChannel): #is dm
-    await cxt.send(msg)
+    send_msg = await cxt.send(msg)
   elif here is True:
-    await cxt.send(msg)
+    send_msg = await cxt.send(msg)
   elif cxt.channel.id in SER_TO_ALLOWED_CHANS[cxt.guild.id]:
-    await cxt.send(msg)
-    # await cxt.message.delete()
+    send_msg = await cxt.send(msg)
   else:
     dedicated_chan = discord_client.get_channel(SER_TO_ANSWER_CHAN[cxt.guild.id])
-    await dedicated_chan.send(msg)
+    send_msg = await dedicated_chan.send(msg)
     await cxt.message.delete()
+  if reactions:
+    for react in reactions:
+      await send_msg.add_reaction(react)
+
 discord_client.run(TOKEN)

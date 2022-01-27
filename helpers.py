@@ -1,8 +1,3 @@
-from random import randrange
-import time
-from defines import DEL_INTERVAL
-from defines import answers as ans
-
 def adjoin_messages(user_id, blockify = True, *msgs):
   sep="  ===============================================================================\n"
   nl = f'\n{sep}'
@@ -13,9 +8,6 @@ def adjoin_messages(user_id, blockify = True, *msgs):
   elif not blockify:
     return f"{nl.join(msgs)}"
   return f"<@{user_id}>```{nl.join(msgs)}```"
-
-def get_delete_interval(args):
-    return None if 'keep' in args else DEL_INTERVAL
 
 def normalize_hashrate(hashrate :int):
   if hashrate < 1_000: #
