@@ -4,7 +4,7 @@ from defines import DEL_INTERVAL
 from defines import answers as ans
 
 def adjoin_messages(user_id, blockify = True, *msgs):
-  sep="  ==============================================================================="
+  sep="  ===============================================================================\n"
   nl = f'\n{sep}'
   if blockify:
     if user_id is None:

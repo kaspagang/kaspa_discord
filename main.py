@@ -5,7 +5,7 @@ from keep_alive import keep_alive
 import kaspa
 import json
 import random
-from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN, SER_TO_ALLOWED_CHANS, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB, DISCLAIMER_INTERVAL, TRADE_OFFER_CHAN, DEVFUND_CHAN, DONATORS)
+from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN, SER_TO_ALLOWED_CHANS, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB, DISCLAIMER_INTERVAL, TRADE_OFFER_CHAN, DEVFUND_CHAN, DONATORS, VOTES_CHANS, VOTE_REACTIONS)
 import helpers
 from requests import get
 import grpc
@@ -18,6 +18,23 @@ discord_client = commands.Bot(command_prefix='$')
 async def on_ready():
   print(f'running {discord_client.user}...')
   discord_client.loop.create_task(send_intermittently())
+
+@discord_client.event
+async def on_message(recv_msg):
+  if int(recv_msg.channel.id) in VOTES_CHANS: #auto react to votes message
+    reactions = ['✅', '⛔', '⚠️', '🔓']
+    for react in reactions:
+      await recv_msg.add_reaction(react)
+  await discord_client.process_commands(recv_msg)
+
+
+@discord_client.event
+async def on_reaction_add(reaction, user):
+    channel = reaction.message.channel.id
+    if user != discord_client.user:
+      if channel in VOTES_CHANS:
+        if reaction.emoji not in VOTE_REACTIONS:
+          await reaction.message.remove_reaction(reaction, user)
 
 ## intermittent posts ##
 
@@ -32,6 +49,7 @@ async def send_intermittently():
     i += 1
     
 async def devfund_update():
+  '''update on devfund every 8 hours'''
   devfund_chan = discord_client.get_channel(DEVFUND_CHAN)
   balances = kaspa.get_balances(
       dev_addrs.MINING_ADDR,
@@ -54,6 +72,7 @@ async def devfund_update():
 
 
 async def trade_disclaimer():
+  '''send disclaimer to trade channel every hour'''
   trade_chan = discord_client.get_channel(TRADE_OFFER_CHAN)
   if random.random() < CALL_FOR_DONATION_PROB:
     msg = helpers.adjoin_messages(
@@ -149,6 +168,7 @@ async def mining_reward(cxt, own_hashrate, *args):
 async def suggest(cxt, *suggestion):
   '''Send a suggestion for the development of kasperbot'''
   here = True if 'here' == suggestion[-1] else False
+  if here: queries.pop()
   try:
     suggestion = "SUGGESTION: " + ' '.join(suggestion)
     await _send(cxt, suggestion, here, blockify = False, dm_dev = True)
@@ -183,6 +203,7 @@ async def my_source_code(cxt, *args):
 async def search_wiki(cxt, *queries):
   '''query the kaspa wiki with search terms'''
   here = True if 'here' in queries[-1] else False
+  if here: queries.pop()
   try:
     j = '+'
     msg = f"https://kaspawiki.net/index.php?search={j.join(queries)}"
@@ -236,7 +257,7 @@ async def test(cxt, *args):
     await _process_exception(cxt, e, here)
 
 
-## processing ###
+## post-processing / routing###
 
 def _post_process_msg(cxt, msg, blockify=True):
   if random.random() < CALL_FOR_DONATION_PROB:
@@ -246,7 +267,7 @@ def _post_process_msg(cxt, msg, blockify=True):
       appendage = ans.DONATION_ADDRS
     return helpers.adjoin_messages(
       cxt.author.id,
-      blockify, 
+      blockify,
       msg,
       appendage
       )
@@ -283,5 +304,5 @@ async def _send(cxt, msg, here, blockify=True, dm_dev=False, dm_user=False):
   else:
     dedicated_chan = discord_client.get_channel(SER_TO_ANSWER_CHAN[cxt.guild.id])
     await dedicated_chan.send(msg)
-    # await cxt.message.delete()
+    await cxt.message.delete()
 discord_client.run(TOKEN)
