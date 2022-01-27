@@ -29,12 +29,14 @@ async def on_message(recv_msg):
 
 
 @discord_client.event
-async def on_reaction_add(reaction, user):
-    channel = reaction.message.channel.id
-    if user != discord_client.user:
-      if channel in VOTES_CHANS:
-        if reaction.emoji not in VOTE_REACTIONS:
-          await reaction.message.remove_reaction(reaction, user)
+async def on_raw_reaction_add(payload):
+    channel = payload.channel_id
+    if payload.user_id != discord_client.user.id:
+      if int(channel) in VOTES_CHANS:
+        if f'{payload.emoji}' not in VOTE_REACTIONS:
+          channel = discord_client.get_channel(payload.channel_id)
+          message = await channel.fetch_message(payload.message_id)
+          await message.remove_reaction(payload.emoji, payload.member)
 
 ## intermittent posts ##
 
