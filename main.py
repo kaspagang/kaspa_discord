@@ -1,10 +1,13 @@
 import discord
 import asyncio
 from discord.ext import commands
+from discord.utils import get as gt
 from keep_alive import keep_alive
+from datetime import datetime
 import kaspa
 import json
 import random
+import time
 from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN, SER_TO_ALLOWED_CHANS, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB, INTERVAL, TRADE_OFFER_CHANS, DEVFUND_CHANS, DONATORS, VOTES_CHANS, VOTE_REACTIONS, DONATE_APPENDAGE_REACTS, TRADE_DIS_INTERVALS, DEVFUND_UPDATE_INTERVALS)
 import helpers
 from requests import get
@@ -20,6 +23,7 @@ discord_client = commands.Bot(command_prefix='$')
 async def on_ready():
   print(f'running {discord_client.user}...')
   discord_client.loop.create_task(send_intermittently())
+  await listen_vote()
 
 @discord_client.event
 async def on_message(recv_msg):
@@ -35,10 +39,13 @@ async def on_raw_reaction_add(payload):
     channel = payload.channel_id
     if payload.user_id != discord_client.user.id:
       if int(channel) in VOTES_CHANS:
-        if f'{payload.emoji}' not in VOTE_REACTIONS:
-          channel = discord_client.get_channel(payload.channel_id)
-          message = await channel.fetch_message(payload.message_id)
-          await message.remove_reaction(payload.emoji, payload.member)
+        channel = await discord_client.fetch_channel(channel)
+        vote_msg = await channel.fetch_message(payload.message_id)
+        if datetime.timestamp(vote_msg.created_at) < (time.time() -60*60*24):
+          await vote_msg.remove_reaction(payload.emoji, payload.member)
+        elif f'{payload.emoji}' not in VOTE_REACTIONS:
+          channel = vote_msg.channel
+          await vote_msg.remove_reaction(payload.emoji, payload.member)
 
 ## intermittent posts ##
 
@@ -47,70 +54,118 @@ async def send_intermittently():
   while True:
     await asyncio.sleep(INTERVAL)
     if i % TRADE_DIS_INTERVALS == 0:
-      await trade_disclaimer()
-    await asyncio.sleep(5)
+      for trade_chan_id in TRADE_OFFER_CHANS:
+        await trade_disclaimer(trade_chan_id)
+    await asyncio.sleep(1)
     if i % DEVFUND_UPDATE_INTERVALS == 0: 
-      await devfund_update()
+      for dev_chan_id in DEVFUND_CHANS:
+        await devfund_update(dev_chan_id)
     i += 1
     
-async def devfund_update():
-  '''update on devfund every 8 hours'''
-  for chan in DEVFUND_CHANS:
-    devfund_chan = await discord_client.fetch_channel(chan)
-    balances = kaspa.get_balances(
-        dev_addrs.MINING_ADDR,
-        dev_addrs.DONATION_ADDR,
-        )
-    if random.random() < CALL_FOR_DONATION_PROB:
-      msg = helpers.adjoin_messages(
-        None, 
-        True, 
-        ans.DEVFUND(*balances),
-        ans.DONATION_ADDRS
-        )
-      reactions = DONATE_APPENDAGE_REACTS
-    else:
-      msg = helpers.adjoin_messages(
-        None, 
-        True, 
-        ans.DEVFUND(*balances)
-        )
-      reactions = None
-    send_msg = await devfund_chan.send(msg)
-    if reactions:
-      for react in reactions:
-        await send_msg.add_reaction(react)
+async def devfund_update(chan_id):
+  devfund_chan = await discord_client.fetch_channel(chan_id)
+  balances = kaspa.get_balances(
+      dev_addrs.MINING_ADDR,
+      dev_addrs.DONATION_ADDR,
+      )
+  if random.random() < CALL_FOR_DONATION_PROB:
+    msg = helpers.adjoin_messages(
+      None, 
+      True, 
+      ans.DEVFUND(*balances),
+      ans.DONATION_ADDRS
+      )
+    reactions = DONATE_APPENDAGE_REACTS
+  else:
+    msg = helpers.adjoin_messages(
+      None, 
+      True, 
+      ans.DEVFUND(*balances)
+      )
+    reactions = None
+  send_msg = await devfund_chan.send(msg)
+  if reactions:
+    for react in reactions:
+      await send_msg.add_reaction(react)
 
+##time_based events###
 
-async def trade_disclaimer():
+async def listen_vote():
+  vote_chan = await discord_client.fetch_channel(VOTES_CHANS[1])
+  after = datetime.fromtimestamp(time.time() - 60*60*24)
+  messages = await vote_chan.history(limit=1, before=after).flatten()
+  for message in messages:
+    await save_vote(message)
+
+async def save_vote(vote_msg):
+  msg_sent = datetime.timestamp(vote_msg.created_at)
+  await asyncio.sleep((msg_sent+60*60*24)-time.time())
+  votes = list()
+  for react in VOTE_REACTIONS:
+      reactions = gt(vote_msg.reactions, emoji=react)
+      votes.append(reactions.count - 1)
+  with open('votes.json', 'r+') as js:
+    data = json.load(js)
+    data.update({
+      vote_msg.id : {'votes' :{
+      'Agree'   : votes[0],
+      'Disagree': votes[1],
+      'Reservations' : votes[2] 
+      }},
+      'Message' : vote_msg.content,
+      'Begin'   : msg_sent,
+      'End'     : time.time(),
+      })
+    js.seek(0)
+    json.dump(data, js)
+  await vote_msg.clear_reaction('🔓')
+  await vote_msg.add_reaction('🔒')
+
+async def trade_disclaimer(chan_id):
   '''send disclaimer to trade channel every hour'''
-  for chan in TRADE_OFFER_CHANS:
-    trade_chan = await discord_client.fetch_channel(chan)
-    message = await trade_chan.fetch_message(trade_chan.last_message_id)
-    if message.author.id == discord_client.user.id:
-      pass
-    if random.random() < CALL_FOR_DONATION_PROB:
-      msg = helpers.adjoin_messages(
-        None, 
-        True, 
-        ans.DISCLAIMER,
-        ans.DONATION_ADDRS
-        )
-      reactions = DONATE_APPENDAGE_REACTS
-    else:
-      msg = helpers.adjoin_messages(
-        None, 
-        True, 
-        ans.DISCLAIMER
-        )
-      reactions = None
-    send_msg = await trade_chan.send(msg)
-    if reactions:
-      for react in reactions:
-        await send_msg.add_reaction(react)
+  trade_chan = await discord_client.fetch_channel(chan_id)
+  messages = await trade_chan.history(limit=2).flatten()
+  if messages[1].author.id == discord_client.user.id:
+    pass
+  if random.random() < CALL_FOR_DONATION_PROB:
+    msg = helpers.adjoin_messages(
+      None, 
+      True, 
+      ans.DISCLAIMER,
+      ans.DONATION_ADDRS
+      )
+    reactions = DONATE_APPENDAGE_REACTS
+  else:
+    msg = helpers.adjoin_messages(
+      None, 
+      True, 
+      ans.DISCLAIMER
+      )
+    reactions = None
+  send_msg = await trade_chan.send(msg)
+  if reactions:
+    for react in reactions:
+      await send_msg.add_reaction(react)
 
 
 ## commands ###
+
+@discord_client.command()
+async def get_votes(cxt, number, *args):
+  '''count votes'''
+  here = True if 'here' in args else False
+  try:
+    vote_chan = await discord_client.fetch_channel(VOTES_CHANS[1])
+    messages = await vote_chan.history(limit=int(number)).flatten()
+    vote_msg = messages[-1]
+    votes = list()
+    for react in VOTE_REACTIONS:
+      reactions = gt(vote_msg.reactions, emoji=react)
+      votes.append(reactions.count - 1)
+    msg = ans.VOTES(number, *votes)
+    await _send(cxt, msg, here)
+  except (Exception, grpc.RpcError) as e:
+    await _process_exception(cxt, e, here)
 
 @discord_client.command()
 async def balance(cxt, address, *args):
@@ -122,7 +177,6 @@ async def balance(cxt, address, *args):
     await _send(cxt, msg, here)
   except (Exception, grpc.RpcError) as e:
     await _process_exception(cxt, e, here)
-
 
 @discord_client.command()
 async def devfund(cxt, *args):
@@ -137,7 +191,6 @@ async def devfund(cxt, *args):
     await _send(cxt, msg, here)
   except Exception as e:
     await _process_exception(cxt, e, here)
-
 
 @discord_client.command()
 async def hashrate(cxt, *args):

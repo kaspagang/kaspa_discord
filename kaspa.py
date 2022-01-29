@@ -50,9 +50,12 @@ def get_hashrate(use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
   except (Exception, grpc.RpcError) as e:
     cli.close()
     get_hashrate(use_dedicated_node=False, tries=tries+1)
+  cli.close()
   return diff * 2
 
 def get_circulating_coins(use_dedicated_node=True, tries=0):
+  if tries == 3:
+    raise Exception
   cli = RPCClient()
   try:
     if use_dedicated_node:
@@ -67,6 +70,7 @@ def get_circulating_coins(use_dedicated_node=True, tries=0):
   except (Exception, grpc.RpcError) as e:
     cli.close()
     get_hashrate(use_dedicated_node=False, tries=tries+1)
+  cli.close()
   return circulating_supply
 
 def get_stats(use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
@@ -95,4 +99,5 @@ def get_stats(use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
     stats['daa_score'] = blockdag_info['virtualDaaScore']
   except (Exception, grpc.RpcError) as e:
     cli.close()
+  cli.close()
   return stats

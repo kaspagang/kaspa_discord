@@ -105,6 +105,12 @@ class answers:
   =======================================================================
   TOTAL:    {mining_addr_value + donation_addr_value} KAS'''
 
+    VOTES = lambda vote_num, yes, no, maybe : f'''
+    Vote #{vote_num}
+    I agree       : {yes}
+    I disagree    : {no}
+    Reservations  : {maybe}'''
+
     BALANCE = lambda balance : f'''
     {balance} KAS'''
 
