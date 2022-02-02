@@ -16,7 +16,7 @@ DONATORS = [
 ## intervals ##
 INTERVAL = 60*60
 TRADE_DIS_INTERVALS = 1
-DEVFUND_UPDATE_INTERVALS = 8
+DEVFUND_UPDATE_INTERVALS = 24
 
 ##channel / server routing##
 ALLOWED_SERVERS = [599153230659846165, 932389256838643755] #kaspa, test
@@ -24,7 +24,7 @@ ALLOWED_SERVERS = [599153230659846165, 932389256838643755] #kaspa, test
 ##channels##
 TRADE_OFFER_CHANS = [910316340735262720, 934846748491415573] #kaspa, test
 DEVFUND_CHANS     = [922204606946234398, 936225666007986186] #kaspa, test
-VOTES_CHANS       = [936036501232447499, 935851925608472617] #kaspa, test
+#VOTES_CHANS       = [936036501232447499, 935851925608472617] #test, kaspa
 DEDICATED_CHANS   = [934815196361404467, 934753516575158282] #kaspa, test
 
 
@@ -43,17 +43,17 @@ SER_TO_ANSWER_CHAN = {
 }
 
 ##for kaspa backend##
-TRY_DEDICATED_NODE = False
+TRY_DEDICATED_NODE = True
 
-CALL_FOR_DONATION_PROB = 1/27 # more reduction 
+CALL_FOR_DONATION_PROB = 1/20 # more reduction 
 
 ##channels##
 TRADE_OFFER_CHAN = 910316340735262720
 DEVFUND_CHAN = 922204606946234398
-VOTES_CHANS = [936036501232447499, 935851925608472617]
+#VOTES_CHANS = [936036501232447499, 935851925608472617]
 
 ##reactions##
-VOTE_REACTIONS = ['✅', '⛔', '⚠️']
+#VOTE_REACTIONS = ['✅', '⛔', '⚠️']
 DONATE_APPENDAGE_REACTS = ['🥺']
 
 class kaspa_constants:
@@ -83,8 +83,8 @@ class answers:
     Tip Hashes    :   {stats['tip_hashes']}'''
 
     COIN_STATS = lambda circulating_coins : f'''
-    Circulating supply  : {circulating_coins}
-    Total supply        : {kaspa_constants.TOTAL_COIN_SUPPLY}
+    Circulating supply  : {circulating_coins:,}
+    Total supply        : {kaspa_constants.TOTAL_COIN_SUPPLY:,}
     Percent mined       : {round(circulating_coins/kaspa_constants.TOTAL_COIN_SUPPLY*100, 2)}%'''
     
     DEVFUND = lambda mining_addr_value, donation_addr_value : f'''
@@ -94,16 +94,16 @@ class answers:
     • {devfund_addresses.DONATION_ADDR}
 
   -----------------------------------------------------------------------
-    Amount: {donation_addr_value} KAS 
+    Amount: {int(donation_addr_value):,} KAS 
   =======================================================================
   Mining addresses:
 
     • {devfund_addresses.MINING_ADDR}
     
   -----------------------------------------------------------------------
-    Amount: {mining_addr_value} KAS
+    Amount: {int(mining_addr_value):,} KAS
   =======================================================================
-  TOTAL:    {mining_addr_value + donation_addr_value} KAS'''
+  TOTAL:    {int(mining_addr_value + donation_addr_value):,} KAS'''
 
     VOTES = lambda vote_num, yes, no, maybe : f'''
     Vote #{vote_num}
@@ -112,7 +112,7 @@ class answers:
     Reservations  : {maybe}'''
 
     BALANCE = lambda balance : f'''
-    {balance} KAS'''
+    {balance:,} KAS'''
 
     SUGGESTION = f'''
   Thanks for your suggestion!'''
@@ -159,15 +159,18 @@ class answers:
     https://github.com/tmrlvi/kaspa-miner/releases'''
 
     MINING_CALC = lambda network_percent : f'''
-  {500*network_percent} KAS/sec
-  {500*60*network_percent} KAS/min
-  {500*60*60*network_percent} KAS/hour
-  {500*60*60*24*network_percent} KAS/day
-  {500*60*60*24*7*network_percent} KAS/week
-  {500*60*60*24*(365.25/12)*network_percent} KAS/month
-  {500*60*60*24*365.25*network_percent} KAS/year'''
+  KAS / sec   :  {500*network_percent:,}
+  KAS / min   :  {round(500*60*network_percent):,}
+  KAS / hour  :  {round(500*60*60*network_percent):,}
+  KAS / day   :  {round(500*60*60*24*network_percent):,}
+  KAS / week  :  {round(500*60*60*24*7*network_percent):,}
+  KAS / month :  {round(500*60*60*24*(365.25/12)*network_percent):,}
+  KAS / year  :  {round(500*60*60*24*365.25*network_percent):,}'''
 
     DONATION_ADDRS = f'''
-Please consider a donation towards:
-• Kasperbot: {kasper_addresses.DONATION_ADDR}
-• Devfund  : {devfund_addresses.DONATION_ADDR}'''
+  Please consider a donation:
+  • Kasperbot: {kasper_addresses.DONATION_ADDR}'''
+#• Devfund  : {devfund_addresses.DONATION_ADDR}'''
+
+    TRADE_PRICE = lambda buy_sell, timestamp : f'''
+  BUY: 1 million KAS for {buy_sell} - {timestamp[0]}'''

@@ -8,7 +8,7 @@ import kaspa
 import json
 import random
 import time
-from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN, SER_TO_ALLOWED_CHANS, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB, INTERVAL, TRADE_OFFER_CHANS, DEVFUND_CHANS, DONATORS, VOTES_CHANS, VOTE_REACTIONS, DONATE_APPENDAGE_REACTS, TRADE_DIS_INTERVALS, DEVFUND_UPDATE_INTERVALS)
+from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN, SER_TO_ALLOWED_CHANS, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB, INTERVAL, TRADE_OFFER_CHANS, DEVFUND_CHANS, DONATORS, DONATE_APPENDAGE_REACTS, TRADE_DIS_INTERVALS, DEVFUND_UPDATE_INTERVALS)
 import helpers
 from requests import get
 import grpc
@@ -23,17 +23,17 @@ discord_client = commands.Bot(command_prefix='$')
 async def on_ready():
   print(f'running {discord_client.user}...')
   discord_client.loop.create_task(send_intermittently())
-  await listen_vote()
-
+'''
 @discord_client.event
 async def on_message(recv_msg):
   if int(recv_msg.channel.id) in VOTES_CHANS: #auto react to votes message
-    reactions = ['✅', '⛔', '⚠️', '🔓']
+    reactions = ['✅', '⛔', '⚠️']
     for react in reactions:
       await recv_msg.add_reaction(react)
   await discord_client.process_commands(recv_msg)
+'''
 
-
+'''
 @discord_client.event
 async def on_raw_reaction_add(payload):
     channel = payload.channel_id
@@ -46,17 +46,17 @@ async def on_raw_reaction_add(payload):
         elif f'{payload.emoji}' not in VOTE_REACTIONS:
           channel = vote_msg.channel
           await vote_msg.remove_reaction(payload.emoji, payload.member)
+'''
 
 ## intermittent posts ##
 
 async def send_intermittently():
   i = 1
   while True:
-    await asyncio.sleep(INTERVAL)
     if i % TRADE_DIS_INTERVALS == 0:
       for trade_chan_id in TRADE_OFFER_CHANS:
         await trade_disclaimer(trade_chan_id)
-    await asyncio.sleep(1)
+    await asyncio.sleep(INTERVAL)
     if i % DEVFUND_UPDATE_INTERVALS == 0: 
       for dev_chan_id in DEVFUND_CHANS:
         await devfund_update(dev_chan_id)
@@ -89,16 +89,18 @@ async def devfund_update(chan_id):
       await send_msg.add_reaction(react)
 
 ##time_based events###
-
+#no longer implement voting stuff
+'''
 async def listen_vote():
   vote_chan = await discord_client.fetch_channel(VOTES_CHANS[1])
   after = datetime.fromtimestamp(time.time() - 60*60*24)
-  messages = await vote_chan.history(limit=1, before=after).flatten()
+  messages = await vote_chan.history(limit=10, before=after).flatten()
   for message in messages:
     await save_vote(message)
 
 async def save_vote(vote_msg):
   msg_sent = datetime.timestamp(vote_msg.created_at)
+  if 
   await asyncio.sleep((msg_sent+60*60*24)-time.time())
   votes = list()
   for react in VOTE_REACTIONS:
@@ -120,44 +122,48 @@ async def save_vote(vote_msg):
     json.dump(data, js)
   await vote_msg.clear_reaction('🔓')
   await vote_msg.add_reaction('🔒')
+'''
 
 async def trade_disclaimer(chan_id):
   '''send disclaimer to trade channel every hour'''
   trade_chan = await discord_client.fetch_channel(chan_id)
-  messages = await trade_chan.history(limit=2).flatten()
-  if messages[1].author.id == discord_client.user.id:
+  messages = await trade_chan.history(limit=10).flatten()
+  message_ids = [message.author.id for message in messages]
+  if discord_client.user.id in message_ids:
     pass
-  if random.random() < CALL_FOR_DONATION_PROB:
-    msg = helpers.adjoin_messages(
-      None, 
-      True, 
-      ans.DISCLAIMER,
-      ans.DONATION_ADDRS
-      )
-    reactions = DONATE_APPENDAGE_REACTS
   else:
-    msg = helpers.adjoin_messages(
-      None, 
-      True, 
-      ans.DISCLAIMER
-      )
-    reactions = None
-  send_msg = await trade_chan.send(msg)
-  if reactions:
-    for react in reactions:
-      await send_msg.add_reaction(react)
+    if random.random() < CALL_FOR_DONATION_PROB:
+      msg = helpers.adjoin_messages(
+        None, 
+        True, 
+        ans.DISCLAIMER,
+        ans.DONATION_ADDRS
+        )
+      reactions = DONATE_APPENDAGE_REACTS
+    else:
+      msg = helpers.adjoin_messages(
+        None, 
+        True, 
+        ans.DISCLAIMER
+        )
+      reactions = None
+    send_msg = await trade_chan.send(msg)
+    if reactions:
+      for react in reactions:
+        await send_msg.add_reaction(react)
 
 
 ## commands ###
-
+'''
 @discord_client.command()
 async def get_votes(cxt, number, *args):
-  '''count votes'''
+  #count votes
   here = True if 'here' in args else False
   try:
     vote_chan = await discord_client.fetch_channel(VOTES_CHANS[1])
-    messages = await vote_chan.history(limit=int(number)).flatten()
-    vote_msg = messages[-1]
+    messages = await vote_chan.history(limit=100, oldest_first=True).flatten()
+    messages = _clear_empty_msgs(messages)
+    vote_msg = messages[int(number)]
     votes = list()
     for react in VOTE_REACTIONS:
       reactions = gt(vote_msg.reactions, emoji=react)
@@ -166,6 +172,7 @@ async def get_votes(cxt, number, *args):
     await _send(cxt, msg, here)
   except (Exception, grpc.RpcError) as e:
     await _process_exception(cxt, e, here)
+'''
 
 @discord_client.command()
 async def balance(cxt, address, *args):
@@ -197,9 +204,7 @@ async def hashrate(cxt, *args):
   '''Get network hashrate'''
   here = True if 'here' in args else False
   try:
-    hashrate = kaspa.get_hashrate(      
-      use_dedicated_node = False
-    )
+    hashrate = kaspa.get_hashrate()
     norm_hashrate = helpers.normalize_hashrate(hashrate)
     msg = ans.HASHRATE(norm_hashrate)
     await _send(cxt, msg, here)
@@ -241,7 +246,6 @@ async def mining_reward(cxt, own_hashrate, *args):
 async def suggest(cxt, *suggestion):
   '''Send a suggestion for the development of kasperbot'''
   here = True if 'here' == suggestion[-1] else False
-  if here: queries.pop()
   try:
     suggestion = "SUGGESTION: " + ' '.join(suggestion)
     await _send(cxt, suggestion, here, blockify = False, dm_dev = True)
@@ -316,6 +320,14 @@ async def coin_supply(cxt, *args):
     await _send(cxt, msg, here)
   except (Exception, grpc.RpcError) as e:
     await _process_exception(cxt, e, here)
+  
+@discord_client.command(hidden=True)
+async def trade(cxt, *args):
+  here = True if 'here' in args else False
+  try:
+    raise Exception
+  except (Exception, grpc.RpcError) as e:
+    await _process_exception(cxt, e, here)
 
 @discord_client.command(hidden=True)
 async def test(cxt, *args):
@@ -330,13 +342,18 @@ async def test(cxt, *args):
   except (Exception, grpc.RpcError) as e:
     await _process_exception(cxt, e, here)
 
+##helpers##
+
+def _clear_empty_msgs(messages):
+  return [msg for msg in messages if msg.content]
+
 
 ## post-processing / routing###
 
 def _post_process_msg(cxt, msg, blockify=True):
   if random.random() < CALL_FOR_DONATION_PROB:
     if str(cxt.author.id) in DONATORS:
-      appendage = get('https://complimentr.com/api').json()['compliment']
+      appendage = '\n   ' + get('https://complimentr.com/api').json()['compliment']
     else:
       appendage = ans.DONATION_ADDRS
     return helpers.adjoin_messages(
@@ -344,7 +361,7 @@ def _post_process_msg(cxt, msg, blockify=True):
       blockify,
       msg,
       appendage
-      ), DONATE_APPENDAGE_REACTS
+      ), None
   else:
     return helpers.adjoin_messages(
       cxt.author.id,
