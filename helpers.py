@@ -103,4 +103,4 @@ def percent_of_network(miner_hashrate, network_hashrate):
   if miner_hashrate <= network_hashrate:
     return miner_hashrate/network_hashrate
   else:
-    return (miner_hashrate-network_hashrate)/(miner_hashrate+network_hashrate)
+    return (miner_hashrate)/(miner_hashrate+network_hashrate)
