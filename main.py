@@ -128,8 +128,9 @@ async def mining_reward(cxt, own_hashrate, *args):
     stats = kaspa.get_stats()
     network_hashrate = int(stats['hashrate'])
     own_hashrate = helpers.hashrate_to_int(own_hashrate)
-    percent_of_network = own_hashrate/network_hashrate
-    msg = ans.MINING_CALC(percent_of_network)
+    percent_of_network = helpers.percent_of_network(own_hashrate, network_hashrate)
+    rewards = helpers.get_mining_rewards(int(stats['daa_score']), percent_of_network)
+    msg = ans.MINING_CALC(rewards)
     await _send(cxt, msg, here)
   except (Exception, grpc.RpcError) as e:
     await _process_exception(cxt, e, here)
