@@ -34,12 +34,12 @@ def rewards_in_range(daa_start, daa_end):
     if daa_start >= def_phase['daa_range'].start:
       start_phase = i
   for def_phase in list(kc.DEFLATIONARY_TABLE.values())[start_phase:]:
-    if daa_end in def_phase['daa_range'] and daa_start in  def_phase['daa_range']:
+    if def_phase['daa_range'].start <= daa_end < def_phase['daa_range'].stop and def_phase['daa_range'].start <= daa_start < def_phase['daa_range'].stop:
         mining_rewards = (daa_end - daa_start) * def_phase['reward_per_daa']
         break
-    elif daa_start in def_phase['daa_range']:
+    elif def_phase['daa_range'].start <= daa_start < def_phase['daa_range'].stop:
       mining_rewards += (def_phase['daa_range'].stop - 1 - daa_start) * def_phase['reward_per_daa']
-    elif daa_end in def_phase['daa_range']:
+    elif def_phase['daa_range'].start <= daa_end < def_phase['daa_range'].stop:
       mining_rewards += (daa_end - def_phase['daa_range'].start) *       def_phase['reward_per_daa']
       break
   return mining_rewards
