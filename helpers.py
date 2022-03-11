@@ -1,3 +1,5 @@
+from defines import kaspa_constants as kc
+
 def adjoin_messages(user_id, blockify = True, *msgs):
   sep="  ==============================================================================="
   nl = f'\n{sep}'
@@ -9,6 +11,26 @@ def adjoin_messages(user_id, blockify = True, *msgs):
     return f"{nl.join(msgs)}"
   return f"<@{user_id}>```{nl.join(msgs)}```"
 
+def get_coin_supply(target_daa_score):
+  if target_daa_score >= list(kc.DEFLATIONARY_TABLE.items())[-1][0]:
+    return kc.TOTAL_COIN_SUPPLY
+  coin_supply = 0
+  last_daa = 0
+  last_reward = 500
+  for item in kc.DEFLATIONARY_TABLE.items():
+    if item[0] == 0:
+      continue
+    else:
+      daa, reward = item
+      if coin_supply < daa:
+        coin_supply += last_reward*(target_daa_score-last_daa)
+        break
+      else:
+        coin_supply += last_reward*(daa-last_daa)
+      last_reward = reward
+      last_daa = daa
+  return coin_supply
+  
 def normalize_hashrate(hashrate :int):
   if hashrate < 1_000: #
     return f'{round(hashrate, 2)} H/s' #Hash
@@ -49,7 +71,4 @@ def hashrate_to_int(str_hashrate : str):
   elif str_hashrate[-3:] == 'H/s':
     hash_digit = float(str_hashrate[:-3])
     return hash_digit
-
-def circulating_supply(daa_score):
-  return daa_score*500
   

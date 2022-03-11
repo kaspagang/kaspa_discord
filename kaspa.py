@@ -3,7 +3,6 @@ from kaspy.utils.version_comparer import version as ver
 import logging 
 import grpc
 from defines import HOST_IP, HOST_PORT, TRY_DEDICATED_NODE 
-from helpers import normalize_hashrate
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
@@ -18,60 +17,21 @@ def get_balances(*addrs, use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
       cli.auto_connect(min_kaspad_version=ver(0,11,9), utxoindex=True)
   except (Exception, grpc.RpcError) as e:
     cli.close()
-    get_balances(use_dedicated_node=False, tries=tries+1)
+    return get_balances(use_dedicated_node=False, tries=tries+1)
   balances = list()
   try:
     for addr in addrs:
-      balance = cli.request('getBalanceByAddressRequest', {'address' : addr})
+      balance = cli.request('getBalanceByAddressRequest', {'address' : addr}, timeout=4)
       if not balance['getBalanceByAddressResponse'].values():
         cli.close()
       balance = balance['getBalanceByAddressResponse']['balance']
       balances.append(int(balance) / 100000000)
   except (Exception, grpc.RpcError) as e:
+    print(e)
     cli.close()
-    get_balances(*addrs, use_dedicated_node=False, tries=tries+1)
+    return get_balances(*addrs, use_dedicated_node=False, tries=tries+1)
   cli.close()
   return balances
-   
-def get_hashrate(use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
-  if tries == 3:
-    raise Exception
-  cli = RPCClient()
-  try:
-    if use_dedicated_node:
-      cli.connect(HOST_IP, int(HOST_PORT))
-    else:
-      cli.auto_connect(min_kaspad_version=ver(0,11,9), utxoindex=True)
-  except (Exception, grpc.RpcError) as e:
-    cli.close()
-    get_hashrate(use_dedicated_node=False, tries=tries+1)
-  try:
-    diff = int(cli.request('getBlockDagInfoRequest', timeout=4)['getBlockDagInfoResponse']['difficulty'])
-  except (Exception, grpc.RpcError) as e:
-    cli.close()
-    get_hashrate(use_dedicated_node=False, tries=tries+1)
-  cli.close()
-  return diff * 2
-
-def get_circulating_coins(use_dedicated_node=True, tries=0):
-  if tries == 3:
-    raise Exception
-  cli = RPCClient()
-  try:
-    if use_dedicated_node:
-      cli.connect(HOST_IP, int(HOST_PORT))
-    else:
-      cli.auto_connect(min_kaspad_version=ver(0,11,9), utxoindex=True)
-  except (Exception, grpc.RpcError) as e:
-    cli.close()
-    cli.auto_connect(min_kaspad_version=ver(0,11,9), utxoindex=True)
-  except (Exception, grpc.RpcError) as e:
-    circulating_supply =  int(cli.request('getBlockDagInfoRequest')['getBlockDagInfoResponse']['blockCount'])*500
-  except (Exception, grpc.RpcError) as e:
-    cli.close()
-    get_hashrate(use_dedicated_node=False, tries=tries+1)
-  cli.close()
-  return circulating_supply
 
 def get_stats(use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
   if tries == 3:
@@ -83,11 +43,12 @@ def get_stats(use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
     else:
       cli.auto_connect(min_kaspad_version=ver(0,11,9), utxoindex=True)
   except (Exception, grpc.RpcError) as e:
+    print(e)
     cli.close()
-    get_stats(use_dedicated_node=False, tries=tries+1)
+    return get_stats(use_dedicated_node=False, tries=tries+1)
   try:
     stats = dict()
-    blockdag_info = cli.request('getBlockDagInfoRequest')['getBlockDagInfoResponse']
+    blockdag_info = cli.request('getBlockDagInfoRequest',timeout=4)['getBlockDagInfoResponse']
     print(blockdag_info)
     stats['block_count'] = blockdag_info['blockCount']
     stats['header_count'] = blockdag_info['headerCount']
@@ -95,9 +56,11 @@ def get_stats(use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
     stats['tip_hashes'] = blockdag_info['tipHashes']
     stats['blocks_per_secound'] = blockdag_info['pastMedianTime']
     stats['difficulty'] = blockdag_info['difficulty']
-    stats['hashrate'] = normalize_hashrate(int(stats['difficulty'])*2)
+    stats['hashrate'] = stats['difficulty']*2
     stats['daa_score'] = blockdag_info['virtualDaaScore']
   except (Exception, grpc.RpcError) as e:
+    print(e)
     cli.close()
+    return get_stats(use_dedicated_node=False, tries=tries+1)
   cli.close()
   return stats
