@@ -49,7 +49,6 @@ def get_stats(use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
   try:
     stats = dict()
     blockdag_info = cli.request('getBlockDagInfoRequest',timeout=4)['getBlockDagInfoResponse']
-    print(blockdag_info)
     stats['block_count'] = blockdag_info['blockCount']
     stats['header_count'] = blockdag_info['headerCount']
     stats['parent_hashes'] = blockdag_info['virtualParentHashes']
