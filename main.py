@@ -114,7 +114,7 @@ async def useful_links(cxt, *args):
 
 
 @discord_client.command()
-async def mining_reward(cxt, own_hashrate, *args):
+async def mining_reward(cxt, own_hashrate, suffix=None, *args):
   '''Calculate mining rewards with specified hashrate
       
       Input: <float_or_integer>xH/s (without spaces!)
@@ -123,10 +123,11 @@ async def mining_reward(cxt, own_hashrate, *args):
       
       Disclaimer: output is only an approximation, and influenced by current dips and spikes in the network hashrate, as well as growth of the network over time. Also, halving events are currently not included in the calculation. 
   '''
-  here = True if 'here' in args else False
+  here = True if 'here' in [suffix, *args] else False
   try:
     stats = kaspa.get_stats()
     network_hashrate = int(stats['hashrate'])
+    own_hashrate = own_hashrate + suffix if suffix else own_hashrate
     own_hashrate = helpers.hashrate_to_int(own_hashrate)
     percent_of_network = helpers.percent_of_network(own_hashrate, network_hashrate)
     rewards = helpers.get_mining_rewards(int(stats['daa_score']), percent_of_network)
@@ -227,6 +228,11 @@ async def test(cxt, *args):
   except (Exception, grpc.RpcError) as e:
     await _process_exception(cxt, e, here)
 
+@discord_client.command(hidden=True)
+async def mining_rewards(cxt, own_hashrate, suffix=None, *args):
+  print(own_hashrate, suffix, args)
+  await cxt.invoke(discord_client.get_command('mining_reward'), own_hashrate=own_hashrate, suffix=suffix, *args)
+  
 ## post-processing / routing###
 
 def _post_process_msg(cxt, msg, blockify=True):

@@ -51,9 +51,10 @@ def get_stats(use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
     blockdag_info = cli.request('getBlockDagInfoRequest',timeout=4)['getBlockDagInfoResponse']
     stats['block_count'] = blockdag_info['blockCount']
     stats['header_count'] = blockdag_info['headerCount']
+    stats['pruning_point'] = blockdag_info['pruningPointHash']
     stats['parent_hashes'] = blockdag_info['virtualParentHashes']
     stats['tip_hashes'] = blockdag_info['tipHashes']
-    stats['blocks_per_secound'] = blockdag_info['pastMedianTime']
+    stats['timestamp'] = blockdag_info['pastMedianTime']
     stats['difficulty'] = blockdag_info['difficulty']
     stats['hashrate'] = stats['difficulty']*2
     stats['daa_score'] = blockdag_info['virtualDaaScore']

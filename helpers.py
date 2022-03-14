@@ -1,4 +1,5 @@
 from defines import kaspa_constants as kc
+import re
 import time
 
 def adjoin_messages(user_id, blockify = True, *msgs):
@@ -77,32 +78,58 @@ def normalize_hashrate(hashrate :int):
     return f'{round(hashrate/1_000_000_000_000_000_000, 2)} EH/s' #Exa
 
 def hashrate_to_int(str_hashrate : str):
-  str_hashrate = str_hashrate.replace(" ", "")
-  if str_hashrate[-4:] == 'KH/s':
-    hash_digit = float(str_hashrate[:-4])
-    return hash_digit*1_000
-  elif str_hashrate[-4:] == 'MH/s':
-    print(str_hashrate[:-4])
-    hash_digit = float(str_hashrate[:-4])
-    return hash_digit*1_000_000
-  elif str_hashrate[-4:] == 'GH/s':
-    hash_digit = float(str_hashrate[:-4])
-    return hash_digit*1_000_000_000
-  elif str_hashrate[-4:] == 'TH/s':
-    hash_digit = float(str_hashrate[:-4])
-    return hash_digit*1_000_000_000_000
-  elif str_hashrate[-4:] == 'PH/s':
-    hash_digit = float(str_hashrate[:-4])
-    return hash_digit*1_000_000_000_000_000
-  elif str_hashrate[-4:] == 'EH/s':
-    hash_digit = float(str_hashrate[:-4])
-    return hash_digit*1_000_000_000_000_000_000
-  elif str_hashrate[-3:] == 'H/s':
-    hash_digit = float(str_hashrate[:-3])
-    return hash_digit
+  val, suffix = extract_hashrate(str_hashrate)
+  if suffix == 'KH':
+    return val*1_000
+  elif suffix == 'MH':
+    return val*1_000_000
+  elif suffix == 'GH':
+    return val*1_000_000_000
+  elif suffix == 'TH':
+    return val*1_000_000_000_000
+  elif suffix == 'PH':
+    return val*1_000_000_000_000_000
+  elif suffix == 'EH':
+    return val*1_000_000_000_000_000_000
+  elif suffix == 'H':
+    return val
 
 def percent_of_network(miner_hashrate, network_hashrate):
   if miner_hashrate <= network_hashrate:
     return miner_hashrate/network_hashrate
   else:
     return (miner_hashrate)/(miner_hashrate+network_hashrate)
+
+def extract_hashrate(str_hashrate):
+  val = float(re.findall(r'\d+(?:\.\d+)?', str_hashrate)[0])
+  for suf in ['KH', 'MH', 'GH', 'TH', 'PH', 'EH', 'H']:
+    if suf.lower() in str_hashrate.lower():
+      suffix = suf
+      break
+  return val, suffix
+
+#work in progress
+'''
+def deflationay_phases(current_daa_score, display_amount=5):
+  if display_amount == 0:
+    daa_start = current_daa_score
+    daa_end = current_daa_score
+  else:
+    daa_start = current_daa_score - kc.DEF_PHASE_INCREMENT*display_amount
+    daa_end = current_daa_score + kc.DEF_PHASE_INCREMENT*display_amount
+  if daa_start < 0:
+    daa_start = 0
+  if daa_end > 1133184600:
+    daa_end = 1133184600
+  for phase, def_phase in kc.DEFLATIONARY_TABLE.items():
+    if def_phase['daa_range'].start <= daa_start < def_phase['daa_range'].stop:
+      pass
+    elif def_phase['daa_range'].start <= daa_end < def_phase['daa_range'].stop:
+      break
+    else:
+
+    
+      current_phase = phase
+  for phase in list(kc.DEFLATIONARY_TABLE.items())[current_phase-display: current_phase+displaye]:
+  
+'''

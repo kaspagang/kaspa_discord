@@ -3,7 +3,7 @@ import pprint as pp
 
 DEV_ID = os.environ['DEV_ID']
 TOKEN = os.environ['TOKEN']
-HOST_IP = os.environ['HOST_IP']
+HOST_IP = os.environ['HOST_IP2']
 HOST_PORT = os.environ['HOST_PORT']
 DONATOR1 = os.environ['DONATOR1']
 
@@ -50,7 +50,7 @@ DEVFUND_CHAN = 922204606946234398
 
 class kaspa_constants:
   TOTAL_COIN_SUPPLY = 28_376_242_397
-  INFLATIONARY_SUPPLY = 15519600*500
+  DEF_PHASE_INCREMENT = 2_629_800
   DEFLATIONARY_TABLE ={
     0: {"daa_range": range(0, 15519600), "reward_per_daa": 500.0},
     1: {"daa_range": range(15519600, 18149400), "reward_per_daa": 440.0},
