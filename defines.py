@@ -586,3 +586,17 @@ class answers:
     {kasper_addresses.DONATION_ADDR}
   • Devfund: 
     {devfund_addresses.DONATION_ADDR}'''
+
+    def DEF_INFO(phases, current_datetime):
+      def_msgs = list()
+      def_msgs.append(f"Current date-time: {current_datetime} GMT\n")
+      def_msgs.append(f"Halving Phases:\n")
+      for phase, phase_info in phases.items():
+        def_msgs.append(
+          f"""PHASE {phase}: 
+    {phase_info['start_date']} GMT ― {phase_info['end_date']} GMT 
+        progress:       {phase_info['completion']}%
+        mining reward:  {phase_info['rewards']}   
+          """
+      )
+      return '\n'.join(def_msgs)

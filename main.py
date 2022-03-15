@@ -8,6 +8,7 @@ from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOK
 import helpers
 from requests import get
 import grpc
+import traceback
 
 keep_alive()
 
@@ -214,6 +215,22 @@ async def coin_supply(cxt, *args):
     await _send(cxt, msg, here)
   except (Exception, grpc.RpcError) as e:
     await _process_exception(cxt, e, here)
+
+@discord_client.command()
+async def halving(cxt, past_dis=3, future_dis=3, *args):
+  '''Display progress of deflationary periods'''
+  here = True if 'here' in [past_dis, future_dis, *args] else False
+  try:
+    stats = kaspa.get_stats()
+    if past_dis == 'here':
+      past_dis = 3
+    if future_dis =='here':
+      future_dis = 3
+    phase_info, current_date = helpers.deflationay_phases(int(stats['daa_score']), int(past_dis), int(future_dis))
+    msg = ans.DEF_INFO(phase_info, current_date)
+    await _send(cxt, msg, here)
+  except (Exception, grpc.RpcError) as e:
+    await _process_exception(cxt, e, here)
   
 @discord_client.command(hidden=True)
 async def test(cxt, *args):
@@ -255,7 +272,7 @@ def _post_process_msg(cxt, msg, blockify=True):
       ), None
 
 async def _process_exception(cxt, e, here):
-  print(e)
+  print(e, traceback.format_exc())
   recv_msg = str(cxt.message.content)
   msg = ans.FAILED(recv_msg)
   await _send(cxt, msg, here)

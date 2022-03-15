@@ -1,6 +1,7 @@
 from defines import kaspa_constants as kc
 import re
 import time
+from datetime import datetime
 
 def adjoin_messages(user_id, blockify = True, *msgs):
   sep="  ==============================================================================="
@@ -12,6 +13,12 @@ def adjoin_messages(user_id, blockify = True, *msgs):
   elif not blockify:
     return f"{nl.join(msgs)}"
   return f"<@{user_id}>```{nl.join(msgs)}```"
+
+def daa_score_to_date(current_daa, target_daa, current_timestamp):
+  current_timestamp = round(current_timestamp)
+  daa_diff = target_daa - current_daa
+  return datetime.utcfromtimestamp(current_timestamp + daa_diff).strftime('%d-%m-%Y %H:%M:%S')
+  
 
 def get_coin_supply(target_daa_score):
   if target_daa_score >= list(kc.DEFLATIONARY_TABLE.values())[-1]['daa_range'].start:
@@ -59,7 +66,6 @@ def get_mining_rewards(current_daa_score, percent_of_network):
   rewards['year'] = rewards_in_range(current_daa_score, current_daa_score+60*60*24*(365.25))*percent_of_network
   print(rewards)
   return rewards
-
 
 def normalize_hashrate(hashrate :int):
   if hashrate < 1_000: #
@@ -109,27 +115,47 @@ def extract_hashrate(str_hashrate):
   return val, suffix
 
 #work in progress
-'''
-def deflationay_phases(current_daa_score, display_amount=5):
-  if display_amount == 0:
-    daa_start = current_daa_score
-    daa_end = current_daa_score
-  else:
-    daa_start = current_daa_score - kc.DEF_PHASE_INCREMENT*display_amount
-    daa_end = current_daa_score + kc.DEF_PHASE_INCREMENT*display_amount
-  if daa_start < 0:
+
+def deflationay_phases(current_daa_score, past_display=3, future_display=3):
+  daa_start = current_daa_score - kc.DEF_PHASE_INCREMENT*past_display
+  daa_end = current_daa_score + kc.DEF_PHASE_INCREMENT*future_display
+  if daa_start < 15519600:
     daa_start = 0
   if daa_end > 1133184600:
     daa_end = 1133184600
-  for phase, def_phase in kc.DEFLATIONARY_TABLE.items():
+  phases = {}
+  timestamp = time.time()
+  current_date = datetime.fromtimestamp(round(timestamp)).strftime('%d-%m-%Y %H:%M:%S')
+  for phase, def_phase in enumerate(kc.DEFLATIONARY_TABLE.values()):
     if def_phase['daa_range'].start <= daa_start < def_phase['daa_range'].stop:
-      pass
-    elif def_phase['daa_range'].start <= daa_end < def_phase['daa_range'].stop:
+      start_index = phase
+    if def_phase['daa_range'].start <= daa_end < def_phase['daa_range'].stop:
+      end_index = phase+1
       break
-    else:
-
-    
-      current_phase = phase
-  for phase in list(kc.DEFLATIONARY_TABLE.items())[current_phase-display: current_phase+displaye]:
-  
-'''
+  for phase, def_phase in list(kc.DEFLATIONARY_TABLE.items())[start_index:end_index]:
+    if def_phase['daa_range'].start <= current_daa_score < def_phase['daa_range'].stop:
+      print(current_daa_score - def_phase['daa_range'].start, def_phase['daa_range'].stop - 1 - def_phase['daa_range'].start)
+      phases[phase] = {
+      'active_phase' : True,
+      'start_date' : daa_score_to_date(current_daa_score, def_phase['daa_range'].start, timestamp),
+      'end_date' : daa_score_to_date(current_daa_score, def_phase['daa_range'].stop-1, timestamp),
+      'completion' : round(((current_daa_score - def_phase['daa_range'].start) / (def_phase['daa_range'].stop - 1 - def_phase['daa_range'].start)), 4)*100,
+      'rewards' : def_phase['reward_per_daa'],
+      }
+    elif def_phase['daa_range'].stop < current_daa_score:  
+      phases[phase] = {
+      'active_phase' : False,
+      'start_date' : daa_score_to_date(current_daa_score, def_phase['daa_range'].start, timestamp),
+      'end_date' : daa_score_to_date(current_daa_score, def_phase['daa_range'].stop-1, timestamp),
+      'completion' : 100,
+      'rewards' : def_phase['reward_per_daa'],
+      }
+    elif def_phase['daa_range'].start > current_daa_score:
+      phases[phase] = {
+      'active_phase' : True,
+      'start_date' : daa_score_to_date(current_daa_score, def_phase['daa_range'].start, timestamp),
+      'end_date' : daa_score_to_date(current_daa_score, def_phase['daa_range'].stop-1, timestamp),
+      'completion' : 0,
+      'rewards' : def_phase['reward_per_daa'],
+      }
+  return phases, current_date
