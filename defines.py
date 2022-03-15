@@ -594,9 +594,10 @@ class answers:
       for phase, phase_info in phases.items():
         def_msgs.append(
           f"""PHASE {phase}: 
-    {phase_info['start_date']} GMT ― {phase_info['end_date']} GMT 
-        progress:       {phase_info['completion']}%
-        mining reward:  {phase_info['rewards']}   
+    start date:     ca. {phase_info['start_date']} GMT 
+    end date:       ca. {phase_info['end_date']} GMT 
+    progress:       {phase_info['completion']}%
+    mining reward:  {phase_info['rewards']:.8f}   
           """
       )
       return '\n'.join(def_msgs)

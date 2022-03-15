@@ -217,16 +217,16 @@ async def coin_supply(cxt, *args):
     await _process_exception(cxt, e, here)
 
 @discord_client.command()
-async def halving(cxt, past_dis=3, future_dis=3, *args):
+async def halving(cxt, start=None, end=None, *args):
   '''Display progress of deflationary periods'''
-  here = True if 'here' in [past_dis, future_dis, *args] else False
+  here = True if 'here' in [start, end, *args] else False
   try:
     stats = kaspa.get_stats()
-    if past_dis == 'here':
-      past_dis = 3
-    if future_dis =='here':
-      future_dis = 3
-    phase_info, current_date = helpers.deflationay_phases(int(stats['daa_score']), int(past_dis), int(future_dis))
+    if start == 'here':
+      start = None
+    if end =='here':
+      end = None
+    phase_info, current_date = helpers.deflationay_phases(int(stats['daa_score']), start, end)
     msg = ans.DEF_INFO(phase_info, current_date)
     await _send(cxt, msg, here)
   except (Exception, grpc.RpcError) as e:
