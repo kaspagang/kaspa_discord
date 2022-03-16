@@ -49,7 +49,7 @@ TRADE_OFFER_CHAN = 910316340735262720
 DEVFUND_CHAN = 922204606946234398
 
 class kaspa_constants:
-  TOTAL_COIN_SUPPLY = 28_376_242_397
+  TOTAL_COIN_SUPPLY = 28_376_234_058
   DEF_PHASE_INCREMENT = 2_629_800
   DEFLATIONARY_TABLE ={
     0: {"daa_range": range(0, 15519600), "reward_per_daa": 500.0},
@@ -502,8 +502,10 @@ class answers:
     DAG_STATS =lambda stats : f'''{pp.pformat(stats)}'''
 
     COIN_STATS = lambda circulating_coins : f'''
-    Circulating supply  : {circulating_coins:,}
-    Total supply        : {kaspa_constants.TOTAL_COIN_SUPPLY:,}
+    Circulating supply  : {circulating_coins:,} KAS
+    Uncirculated supply : {kaspa_constants.TOTAL_COIN_SUPPLY -circulating_coins:,} KAS
+    ========================================
+    Total supply        : {kaspa_constants.TOTAL_COIN_SUPPLY:,} KAS
     Percent mined       : {round(circulating_coins/kaspa_constants.TOTAL_COIN_SUPPLY*100, 2)}%'''
     
     DEVFUND = lambda mining_addr_value, donation_addr_value : f'''
@@ -587,15 +589,21 @@ class answers:
   • Devfund: 
     {devfund_addresses.DONATION_ADDR}'''
 
-    def DEF_INFO(phases, current_datetime):
+    def DEF_INFO(phases, current_datetime, current_supply):
       def_msgs = list()
-      def_msgs.append(f"Current date-time: {current_datetime} GMT\n")
+      def_msgs.append(f"Current date-time:    {current_datetime} GMT \n")
+      def_msgs.append(f"Current supply:       {current_supply:,} KAS")
+      def_msgs.append(f"Uncirculated supply:  {kaspa_constants.TOTAL_COIN_SUPPLY -current_supply:,} KAS")
+      def_msgs.append("========================================")
+      def_msgs.append(f"Total supply:         {kaspa_constants.TOTAL_COIN_SUPPLY:,} KAS\n")
       def_msgs.append(f"Halving Phases:\n")
       for phase, phase_info in phases.items():
         def_msgs.append(
           f"""PHASE {phase}: 
     start date:     ca. {phase_info['start_date']} GMT 
+      start supply:   {phase_info['start_supply']:,} KAS
     end date:       ca. {phase_info['end_date']} GMT 
+      end supply:     {phase_info['end_supply']:,} KAS
     progress:       {phase_info['completion']}%
     mining reward:  {phase_info['rewards']:.8f}   
           """

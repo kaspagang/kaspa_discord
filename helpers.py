@@ -150,7 +150,9 @@ def deflationay_phases(current_daa_score, start=None, end=None):
       phases[phase] = {
       'active_phase' : True,
       'start_date' : start_date,
+      'start_supply'  :  get_coin_supply(def_phase['daa_range'].start),
       'end_date' : end_date,
+      'end_supply'  :  get_coin_supply(def_phase['daa_range'].stop-1),
       'completion' : round(((current_daa_score - def_phase['daa_range'].start) / (def_phase['daa_range'].stop - 1 - def_phase['daa_range'].start)*100), 2),
       'rewards' : def_phase['reward_per_daa'],
       }
@@ -158,7 +160,9 @@ def deflationay_phases(current_daa_score, start=None, end=None):
       phases[phase] = {
       'active_phase' : False,
       'start_date' : start_date,
+      'start_supply'  :  get_coin_supply(def_phase['daa_range'].start),
       'end_date' : end_date,
+      'end_supply'  :  get_coin_supply(def_phase['daa_range'].stop-1),
       'completion' : 100,
       'rewards' : def_phase['reward_per_daa'],
       }
@@ -166,7 +170,9 @@ def deflationay_phases(current_daa_score, start=None, end=None):
       phases[phase] = {
       'active_phase' : True,
       'start_date' : start_date,
+      'start_supply'  :  get_coin_supply(def_phase['daa_range'].start),
       'end_date' : end_date,
+      'end_supply'  :  get_coin_supply(def_phase['daa_range'].stop-1),
       'completion' : 0,
       'rewards' : def_phase['reward_per_daa'],
       }

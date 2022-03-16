@@ -226,8 +226,12 @@ async def halving(cxt, start=None, end=None, *args):
       start = None
     if end =='here':
       end = None
-    phase_info, current_date = helpers.deflationay_phases(int(stats['daa_score']), start, end)
-    msg = ans.DEF_INFO(phase_info, current_date)
+    if start == 'all':
+      start = 0
+      end = 426
+    current_supply = helpers.get_coin_supply(int(stats['daa_score']))
+    phase_info, current_date, = helpers.deflationay_phases(int(stats['daa_score']), start, end)
+    msg = ans.DEF_INFO(phase_info, current_date, current_supply)
     await _send(cxt, msg, here)
   except (Exception, grpc.RpcError) as e:
     await _process_exception(cxt, e, here)
