@@ -1,0 +1,15 @@
+# kaspa_discord
+Discord client for kaspa discord, based on kaspy.
+
+Running an own instances will require some rewriting of the source code and creation of some enviroment variables, but if you wish to run it on a different discord guild / server just drop me a message, either here or @jwj on discord.
+
+the main operations (among many others) of the bot so far include:
+- query hashrate
+- query balance
+- query raw dag information
+- query halving phases
+- query coin_supply
+- mining reward calculator
+- OTC fraud protection against duplicate display names
+
+Donations are welcome @ kaspa:qp33anhdnnsfzg474jd3s5csuaf0k9kn6cvy3pfcx9rnezak5qkhgskuztcum
