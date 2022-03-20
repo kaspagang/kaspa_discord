@@ -182,25 +182,3 @@ def deflationay_phases(current_daa_score, start=None, end=None):
       'rewards' : def_phase['reward_per_daa'],
       }
   return phases, current_date
-
-def calculate_levenshtein_distance(str_1, str_2):
-  #copied from:     
-  #https://codereview.stackexchange.com/questions/217065/calculate-levenshtein-distance-between-two-strings-in-python
-    """
-        The Levenshtein distance is a string metric for measuring the         difference between two sequences.
-        It is calculated as the minimum number of single-character             edits necessary to transform one string into another
-    """
-    distance = 0
-    buffer_removed = buffer_added = 0
-    for x in ndiff(str_1, str_2):
-        code = x[0]
-        # Code ? is ignored as it does not translate to any modification
-        if code == ' ':
-            distance += max(buffer_removed, buffer_added)
-            buffer_removed = buffer_added = 0
-        elif code == '-':
-            buffer_removed += 1
-        elif code == '+':
-            buffer_added += 1
-    distance += max(buffer_removed, buffer_added)
-    return distance
