@@ -30,7 +30,6 @@ async def on_member_update(member_before, member_after):
   if member_before.display_name != member_after.display_name:
     print(f'checking altered user: {member_before.display_name} -> {member_after.display_name}')
     await check_impersonations(member_after)
-  pass
 
 @bot.event
 async def on_user_update(member_before, member_after):
@@ -38,7 +37,6 @@ async def on_user_update(member_before, member_after):
   if member_before.display_name != member_after.display_name:
     print(f'checking altered user: {member_before.display_name} -> {member_after.display_name}')
     await check_impersonations(member_after)
-  pass
 
 @bot.event
 async def on_member_join(member_new):
@@ -48,7 +46,7 @@ async def on_member_join(member_new):
 async def check_impersonations(member_check):
   for guild_member in member_check.guild.members:
       if guild_member.id != member_check.id:
-        lev_percent = levenshtein_ratio(member_check.display_name, guild_member.display_name)
+        lev_percent = levenshtein_ratio(member_check.display_name.lower(), guild_member.display_name.lower())
         if lev_percent > 0.75:
           print(f'found {round(lev_percent*100)} simularity between target :{guild_member.display_name} and impersonator: {member_check.display_name}')
           if random.random() < CALL_FOR_DONATION_PROB:
@@ -84,23 +82,25 @@ async def trade_disclaimer(chan_id):
   '''send disclaimer to trade channel every hour'''
   trade_chan = await bot.fetch_channel(chan_id)
   messages = await trade_chan.history(limit=10).flatten()
-  message_ids = [message.author.id for message in messages]
-  if bot.user.id in message_ids:
-    pass
-  else:
-    if random.random() < CALL_FOR_DONATION_PROB:
-      msg = helpers.adjoin_messages(
+  message_contents = set(message.content for message in messages)
+  msg_1 = helpers.adjoin_messages(
         None, 
         True, 
         ans.DISCLAIMER,
         ans.DONATION_ADDRS
         )
-    else:
-      msg = helpers.adjoin_messages(
+  msg_2 = helpers.adjoin_messages(
         None, 
         True, 
         ans.DISCLAIMER
         )
+  if set(msg_1, msg_2) & message_contents:
+    pass
+  else:
+    if random.random() < CALL_FOR_DONATION_PROB:
+      msg = msg_1
+    else:
+      msg = msg_2
     await trade_chan.send(msg)
 
 ## commands ###

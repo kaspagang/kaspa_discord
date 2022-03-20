@@ -40,12 +40,15 @@ TRY_DEDICATED_NODE = False
 
 #will lower probability when I receive donations
 #will increase probability when I invest time into it
-CALL_FOR_DONATION_PROB = 1/12
+# -> 5k = 1 point increase
+CALL_FOR_DONATION_PROB = 1/28
+
 #starting changelog:
 
-#Increase for impersonation detection:  -4
-#Increase for $halving:                 -4
-#decrease for 100k kaspa:               +8
+#Increase for impersonation detection:  -5
+#Increase for $halving:                 -7
+#decrease for 100k kaspa:               +20
+#start:                                 +20
 
 
 
