@@ -2,6 +2,7 @@ from defines import kaspa_constants as kc
 import re
 import time
 from datetime import datetime
+from difflib import ndiff
 
 def adjoin_messages(user_id, blockify = True, *msgs):
   sep="  ==============================================================================="
@@ -9,16 +10,20 @@ def adjoin_messages(user_id, blockify = True, *msgs):
   if blockify:
     if user_id is None:
       return f"```{nl.join(msgs)}```"
-    return f"<@{user_id}>```{nl.join(msgs)}```"
+    else:
+      return f"<@{user_id}>```{nl.join(msgs)}```"
   elif not blockify:
-    return f"{nl.join(msgs)}"
-  return f"<@{user_id}>```{nl.join(msgs)}```"
+    if user_id is None:
+      return f"{nl.join(msgs)}"
+    else:
+      return f"<@{user_id}> \n\n {nl.join(msgs)}"
 
 def daa_score_to_date(current_daa, target_daa, current_timestamp):
   current_timestamp = round(current_timestamp)
   daa_diff = target_daa - current_daa
-  return datetime.utcfromtimestamp(current_timestamp + daa_diff).strftime('%d-%m-%Y %H:%M:%S')
-
+  return datetime.utcfromtimestamp(current_timestamp + round(daa_diff*0.99166666666)).strftime('%d-%m-%Y %H:%M:%S')
+#0.99166666666
+  
 def get_current_halving_phase(current_daa_score):
   for phase, def_phase in enumerate(kc.DEFLATIONARY_TABLE.values()):
     if def_phase['daa_range'].start <= current_daa_score < def_phase['daa_range'].stop:
@@ -177,3 +182,25 @@ def deflationay_phases(current_daa_score, start=None, end=None):
       'rewards' : def_phase['reward_per_daa'],
       }
   return phases, current_date
+
+def calculate_levenshtein_distance(str_1, str_2):
+  #copied from:     
+  #https://codereview.stackexchange.com/questions/217065/calculate-levenshtein-distance-between-two-strings-in-python
+    """
+        The Levenshtein distance is a string metric for measuring the         difference between two sequences.
+        It is calculated as the minimum number of single-character             edits necessary to transform one string into another
+    """
+    distance = 0
+    buffer_removed = buffer_added = 0
+    for x in ndiff(str_1, str_2):
+        code = x[0]
+        # Code ? is ignored as it does not translate to any modification
+        if code == ' ':
+            distance += max(buffer_removed, buffer_added)
+            buffer_removed = buffer_added = 0
+        elif code == '-':
+            buffer_removed += 1
+        elif code == '+':
+            buffer_added += 1
+    distance += max(buffer_removed, buffer_added)
+    return distance

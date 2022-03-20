@@ -25,14 +25,10 @@ ALLOWED_SERVERS = [599153230659846165, 932389256838643755] #kaspa, test
 TRADE_OFFER_CHANS = [910316340735262720, 934846748491415573] #kaspa, test
 DEDICATED_CHANS   = [934815196361404467, 934753516575158282] #kaspa, test
 
-SER_TO_ALLOWED_CHANS = {
-  599153230659846165 :{ #kaspa
-    DEDICATED_CHANS[0]
-  },
-  932389256838643755 : [ #test 
-    DEDICATED_CHANS[1]
-    ]
-  }
+SER_TO_TRADE_CHANS = {
+  599153230659846165 : TRADE_OFFER_CHANS[0], #kaspa
+  932389256838643755 : TRADE_OFFER_CHANS[1] #test
+}
 
 SER_TO_ANSWER_CHAN = {
   599153230659846165 : DEDICATED_CHANS[0], #kaspa
@@ -40,7 +36,7 @@ SER_TO_ANSWER_CHAN = {
 }
 
 ##for kaspa backend##
-TRY_DEDICATED_NODE = True
+TRY_DEDICATED_NODE = False
 
 CALL_FOR_DONATION_PROB = 1/20 # more reduction 
 
@@ -494,6 +490,10 @@ class answers:
   
   This is a kind reminder that #trade channel is not moderated by the server mods, core devs, treasurers or any other constituents of the Kaspa community. This channel was created to accommodate traders which bogged down the community channel, having created it does not impose any responsibility for the actions of any buyer, seller, escrow service etc. on any particular community member. Please be mindful of that and careful with your money.'''
 
+    SIMILAR_MEMBER = lambda imp_id, imp_name, target_id, target_name, lev_per : f'''
+INFO: <@{imp_id}> with display-name `{imp_name}` has registered a similar display-name to <@{target_id}> with display-name `{target_name}` (similarity score: {round(lev_per*100)} %).
+'''
+
     FAILED = lambda recv_msg : f'''
   Could not process: {recv_msg}'''
 
@@ -600,12 +600,12 @@ class answers:
       for phase, phase_info in phases.items():
         def_msgs.append(
           f"""PHASE {phase}: 
-    start date:     ca. {phase_info['start_date']} GMT 
-      start supply:   {phase_info['start_supply']:,} KAS
-    end date:       ca. {phase_info['end_date']} GMT 
-      end supply:     {phase_info['end_supply']:,} KAS
-    progress:       {phase_info['completion']}%
-    mining reward:  {phase_info['rewards']:.8f}   
+    Start date:     ca. {phase_info['start_date']} GMT 
+      Start supply:   {phase_info['start_supply']:,} KAS
+    End date:       ca. {phase_info['end_date']} GMT 
+      End supply:     {phase_info['end_supply']:,} KAS
+    Completion:     {phase_info['completion']}%
+    Mining reward:  {phase_info['rewards']:.8f}   
           """
       )
       return '\n'.join(def_msgs)
