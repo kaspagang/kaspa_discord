@@ -14,6 +14,8 @@ the main abilities (among many others) of the bot so far include:
 - mining reward calculator
 - OTC fraud protection against duplicate display names
 
+a comprehensive list of commands can be queried with `$help`
+
 # Suggestions
 please feel free to message me here, @jwj on discord, or send an anonymous suggestion to me via the bot-command `$suggest <suggestion>`, many thanks.
 
