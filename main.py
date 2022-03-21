@@ -9,7 +9,7 @@ import helpers
 from requests import get
 import grpc
 import traceback
-from Levenshtein import ratio as levenshtein_ratio
+from Levenshtein import distance as levenshtein_distance
 
 keep_alive()
 intents = discord.Intents.default().all()
@@ -31,12 +31,14 @@ async def on_member_update(member_before, member_after):
     print(f'checking altered user: {member_before.display_name} -> {member_after.display_name}')
     await check_impersonations(member_after)
 
+'''
 @bot.event
 async def on_user_update(member_before, member_after):
   #print(f'user updated: {member_before.display_name} -> {member_after.display_name}')
   if member_before.display_name != member_after.display_name:
     print(f'checking altered user: {member_before.display_name} -> {member_after.display_name}')
     await check_impersonations(member_after)
+'''
 
 @bot.event
 async def on_member_join(member_new):
@@ -46,21 +48,22 @@ async def on_member_join(member_new):
 async def check_impersonations(member_check):
   for guild_member in member_check.guild.members:
       if guild_member.id != member_check.id:
-        lev_percent = levenshtein_ratio(member_check.display_name.lower(), guild_member.display_name.lower())
-        if lev_percent > 0.75:
-          print(f'found {round(lev_percent*100)} simularity between target :{guild_member.display_name} and impersonator: {member_check.display_name}')
+        lev_ratio = 1 - levenshtein_distance(member_check.display_name.lower(), guild_member.display_name.lower()) / max(len(member_check.display_name.lower()), len(guild_member.display_name.lower()))
+        print(lev_ratio)
+        if lev_ratio >= 0.75:
+          print(f'found {round( lev_ratio*100)} simularity between target :{guild_member.display_name} and impersonator: {member_check.display_name}')
           if random.random() < CALL_FOR_DONATION_PROB:
             msg = helpers.adjoin_messages(
               None, 
               False, 
-              ans.SIMILAR_MEMBER(member_check.id, member_check.display_name, guild_member.id, guild_member.display_name, lev_percent),
+              ans.SIMILAR_MEMBER(member_check.id, member_check.display_name, guild_member.id, guild_member.display_name, lev_ratio),
               ans.DONATION_ADDRS
               )
           else:
             msg = helpers.adjoin_messages(
               None, 
               False, 
-              ans.SIMILAR_MEMBER(member_check.id, member_check.display_name, guild_member.id, guild_member.display_name, lev_percent),
+              ans.SIMILAR_MEMBER(member_check.id, member_check.display_name, guild_member.id, guild_member.display_name, lev_ratio),
               )
           trade_chan_id = SER_TO_TRADE_CHANS[int(member_check.guild.id)]
           trade_chan = await bot.fetch_channel(trade_chan_id)
@@ -94,7 +97,7 @@ async def trade_disclaimer(chan_id):
         True, 
         ans.DISCLAIMER
         )
-  if set(msg_1, msg_2) & message_contents:
+  if set([msg_1, msg_2]) & message_contents:
     pass
   else:
     if random.random() < CALL_FOR_DONATION_PROB:
@@ -117,18 +120,46 @@ async def balance(cxt, address, *args):
     await _process_exception(cxt, e, here)
 
 @bot.command()
-async def devfund(cxt, *args):
+async def devfund(cxt, window_size=None, *args):
   '''Display devfund balance'''
-  here = True if 'here' in args else False
+  here = True if 'here' in [window_size,] + list(args) else False
+  if window_size == None or window_size == 'here':
+    window_size = 120 #daa_window
+  else:
+    window_size = int(window_size)
   try:
     balances = kaspa.get_balances(
       dev_addrs.MINING_ADDR,
       dev_addrs.DONATION_ADDR,
       )
-    msg = ans.DEVFUND(*balances)
+    utxos = kaspa.get_utxo_entries(dev_addrs.MINING_ADDR)
+    percent_of_network = helpers.utxo_percent_of_network(utxos, window_size)
+    print(percent_of_network)
+    msg = ans.DEVFUND(*balances, percent_of_network)
     await _send(cxt, msg, here)
   except Exception as e:
     await _process_exception(cxt, e, here)
+
+@bot.command()
+async def address_stats(cxt, address, window_size = None, *args):
+  '''Estimate network share associated with address'''
+  here = True if 'here' in [window_size,] + list(args) else False
+  if window_size == None or window_size == 'here':
+    window_size = 40 #daa_window
+  else:
+    window_size = int(window_size)
+  try:
+    balance = int(kaspa.get_balances(address)[0])
+    utxos = kaspa.get_utxo_entries(address)
+    network_hashrate = int(kaspa.get_stats()['hashrate'])
+    addr_percent = helpers.utxo_percent_of_network(utxos, window_size)
+    addr_hashrate = helpers.hashrate_from_percent_of_network(addr_percent, network_hashrate)
+    addr_hashrate = helpers.normalize_hashrate(addr_hashrate)
+    msg = ans.ADDR_STATS(address, balance, addr_percent, addr_hashrate)
+    await _send(cxt, msg, here)
+  except (Exception, grpc.RpcError) as e:
+    await _process_exception(cxt, e, here)
+
 
 @bot.command()
 async def hashrate(cxt, *args):
@@ -171,6 +202,7 @@ async def mining_reward(cxt, own_hashrate, suffix=None, *args):
     own_hashrate = own_hashrate + suffix if suffix else own_hashrate
     own_hashrate = helpers.hashrate_to_int(own_hashrate)
     percent_of_network = helpers.percent_of_network(own_hashrate, network_hashrate)
+    print('percent_of_network (minging): ', percent_of_network)
     rewards = helpers.get_mining_rewards(int(stats['daa_score']), percent_of_network)
     msg = ans.MINING_CALC(rewards)
     await _send(cxt, msg, here)
@@ -288,6 +320,16 @@ async def test(cxt, *args):
     if 'fail' in args:
       raise Exception('intentional fail')
     await _send(cxt, msg, here, dm_user=ghost)
+  except (Exception, grpc.RpcError) as e:
+    await _process_exception(cxt, e, here)
+
+@bot.command(hidden=True)
+async def test_utxo(cxt, address, amount, *args):
+  here = True if 'here' in args else False
+  try:
+    utxo = kaspa.get_utxo_entries(address)[:int(amount)]
+    msg = str(utxo)
+    await _send(cxt, msg, here)
   except (Exception, grpc.RpcError) as e:
     await _process_exception(cxt, e, here)
 

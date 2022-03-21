@@ -36,15 +36,15 @@ SER_TO_ANSWER_CHAN = {
 }
 
 ##for kaspa backend##
-TRY_DEDICATED_NODE = False
+TRY_DEDICATED_NODE = True
 
 #will lower probability when I receive donations
 #will increase probability when I invest time into it
 # -> 5k = 1 point increase
-CALL_FOR_DONATION_PROB = 1/28
+CALL_FOR_DONATION_PROB = 1/26
 
 #starting changelog:
-
+#Increase for $address_stats            -2
 #Increase for impersonation detection:  -5
 #Increase for $halving:                 -7
 #decrease for 100k kaspa:               +20
@@ -520,7 +520,7 @@ INFO: <@{imp_id}> has registered the display-name `{imp_name}`, which is similar
     Total supply        : {kaspa_constants.TOTAL_COIN_SUPPLY:,} KAS
     Percent mined       : {round(circulating_coins/kaspa_constants.TOTAL_COIN_SUPPLY*100, 2)}%'''
     
-    DEVFUND = lambda mining_addr_value, donation_addr_value : f'''
+    DEVFUND = lambda mining_addr_value, donation_addr_value, percent_of_network : f'''
   =======================================================================
   Donation addresses:
 
@@ -534,12 +534,19 @@ INFO: <@{imp_id}> has registered the display-name `{imp_name}`, which is similar
     • {devfund_addresses.MINING_ADDR}
     
   -----------------------------------------------------------------------
-    Amount: {int(mining_addr_value):,} KAS
+    Amount: {int(mining_addr_value):,} KAS, (Approx. share of network: {round(percent_of_network*100, 2)}%)
   =======================================================================
   TOTAL:    {int(mining_addr_value + donation_addr_value):,} KAS'''
 
     BALANCE = lambda balance : f'''
     {balance:,} KAS'''
+
+    ADDR_STATS = lambda address, balance, addr_percent, addr_hashrate: f'''
+    • {address}:  
+        Balance       : {round(balance)} KAS
+        Network Share : {round(addr_percent*100, 4)} %
+        Hashrate      : {addr_hashrate}
+    '''
 
     SUGGESTION = f'''
     Thanks for your suggestion!'''
@@ -596,10 +603,9 @@ INFO: <@{imp_id}> has registered the display-name `{imp_name}`, which is similar
 
     DONATION_ADDRS = f'''
   Please consider a donation:
-  • Kasperbot: 
+  • KasperBot: 
     {kasper_addresses.DONATION_ADDR}
-  • Devfund: 
-    {devfund_addresses.DONATION_ADDR}'''
+  '''
 
     def DEF_INFO(phases, current_datetime, current_supply):
       def_msgs = list()

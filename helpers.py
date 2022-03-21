@@ -18,6 +18,11 @@ def adjoin_messages(user_id, blockify = True, *msgs):
     else:
       return f"<@{user_id}> \n\n {nl.join(msgs)}"
 
+def sompis_to_kas(sompis, round_amount=None):
+  if round:
+    return round(sompis / 100000000, round_amount)
+  return sompis / 100000000
+
 def daa_score_to_date(current_daa, target_daa, current_timestamp):
   current_timestamp = round(current_timestamp)
   daa_diff = target_daa - current_daa
@@ -109,6 +114,9 @@ def hashrate_to_int(str_hashrate : str):
   elif suffix == 'H':
     return val
 
+def hashrate_from_percent_of_network(percent_of_network, hashrate):
+  return hashrate * percent_of_network
+
 def percent_of_network(miner_hashrate, network_hashrate):
   if miner_hashrate <= network_hashrate:
     return miner_hashrate/network_hashrate
@@ -122,6 +130,17 @@ def extract_hashrate(str_hashrate):
       suffix = suf
       break
   return val, suffix
+
+def utxo_percent_of_network(utxo_entries, window):
+  coinbase_daas = []
+  for utxo_entry in utxo_entries:
+    if 'isCoinbase' in utxo_entry['utxoEntry'].keys() and utxo_entry['utxoEntry']['isCoinbase']:
+      coinbase_daas.append(int(utxo_entry['utxoEntry']['blockDaaScore']))
+  coinbase_daas.sort(reverse=True)
+  if len(coinbase_daas) > window:
+    coinbase_daas = coinbase_daas[:window]
+  daa_diff = int(coinbase_daas[0]) - int(coinbase_daas[-1])
+  return len(coinbase_daas[:-1]) / daa_diff
 
 #work in progress
 

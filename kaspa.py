@@ -14,7 +14,7 @@ def get_balances(*addrs, use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
     if use_dedicated_node:
       cli.connect(HOST_IP, int(HOST_PORT))
     else:
-      cli.auto_connect(min_kaspad_version=ver(0,11,9), utxoindex=True)
+      cli.auto_connect(min_kaspad_version=ver(0,11,12), utxoindex=True)
   except (Exception, grpc.RpcError) as e:
     cli.close()
     return get_balances(use_dedicated_node=False, tries=tries+1)
@@ -41,7 +41,7 @@ def get_stats(use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
     if use_dedicated_node:
       cli.connect(HOST_IP, int(HOST_PORT))
     else:
-      cli.auto_connect(min_kaspad_version=ver(0,11,9), utxoindex=True)
+      cli.auto_connect(min_kaspad_version=ver(0,11,12), utxoindex=True)
   except (Exception, grpc.RpcError) as e:
     print(e)
     cli.close()
@@ -64,3 +64,25 @@ def get_stats(use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
     return get_stats(use_dedicated_node=False, tries=tries+1)
   cli.close()
   return stats
+
+def get_utxo_entries(addr, use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
+  if tries == 3:
+    raise Exception
+  cli = RPCClient()
+  try:
+    if use_dedicated_node:
+      cli.connect(HOST_IP, int(HOST_PORT))
+    else:
+      cli.auto_connect(min_kaspad_version=ver(0,11,13), utxoindex=True, max_receive_size= -1)
+  except (Exception, grpc.RpcError) as e:
+    cli.close()
+    return get_utxo_entries(use_dedicated_node=False, tries=tries+1)
+  try:
+    utxo_entries = list(cli.request('getUtxosByAddressesRequest', {'addresses' : [addr,]}, timeout=10)['getUtxosByAddressesResponse']['entries'])
+    #utxos = [utxo['utxoEntry'] for utxo in utxo_entries]
+  except (Exception, grpc.RpcError) as e:
+    print(e)
+    cli.close()
+    return get_utxo_entries(addr, use_dedicated_node=False, tries=tries+1)
+  cli.close()
+  return utxo_entries
