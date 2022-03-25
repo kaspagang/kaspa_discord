@@ -11,6 +11,7 @@ the main abilities (among many others) of the bot so far include:
 - query raw dag information
 - query halving phases
 - query coin_supply
+- query top miners and effective mining rates.
 - mining reward calculator
 - OTC fraud protection against duplicate display names
 

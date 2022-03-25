@@ -65,24 +65,92 @@ def get_stats(use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
   cli.close()
   return stats
 
-def get_utxo_entries(addr, use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
+def get_utxo_entries(addrs, use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
   if tries == 3:
     raise Exception
   cli = RPCClient()
   try:
     if use_dedicated_node:
-      cli.connect(HOST_IP, int(HOST_PORT))
+      cli.connect(HOST_IP, int(HOST_PORT),  max_receive_size= -1)
     else:
       cli.auto_connect(min_kaspad_version=ver(0,11,13), utxoindex=True, max_receive_size= -1)
   except (Exception, grpc.RpcError) as e:
     cli.close()
     return get_utxo_entries(use_dedicated_node=False, tries=tries+1)
   try:
-    utxo_entries = list(cli.request('getUtxosByAddressesRequest', {'addresses' : [addr,]}, timeout=10)['getUtxosByAddressesResponse']['entries'])
+    print(addrs)
+    utxo_entries = list(cli.request('getUtxosByAddressesRequest', {'addresses' : addrs})['getUtxosByAddressesResponse']['entries'])
     #utxos = [utxo['utxoEntry'] for utxo in utxo_entries]
   except (Exception, grpc.RpcError) as e:
     print(e)
     cli.close()
-    return get_utxo_entries(addr, use_dedicated_node=False, tries=tries+1)
+    return get_utxo_entries(addrs, use_dedicated_node=False, tries=tries+1)
   cli.close()
   return utxo_entries
+
+def get_blocks(start_block_hash, use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
+  if tries == 3:
+    raise Exception
+  cli = RPCClient()
+  try:
+    if use_dedicated_node:
+      cli.connect(HOST_IP, int(HOST_PORT),  max_receive_size= -1)
+    else:
+      cli.auto_connect(min_kaspad_version=ver(0,11,13), utxoindex=True,  max_receive_size= -1)
+  except (Exception, grpc.RpcError) as e:
+    print(e)
+    cli.close()
+    return get_blocks(use_dedicated_node=False, tries=tries+1)
+  try:
+    blocks = cli.request('getVirtualSelectedParentChainFromBlockRequest', {'startHash' : start_block_hash})['getVirtualSelectedParentChainFromBlockResponse']['addedChainBlockHashes']
+  except (Exception, grpc.RpcError) as e:
+    print(e)
+    cli.close()
+    return get_blocks(use_dedicated_node=False, tries=tries+1)
+  cli.close()
+  return blocks
+
+def get_blocks_detailed(start_block_hash, window, use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
+  if tries == 3:
+    raise Exception
+  cli = RPCClient()
+  try:
+    if use_dedicated_node:
+      cli.connect(HOST_IP, int(HOST_PORT),  max_receive_size= -1)
+    else:
+      cli.auto_connect(min_kaspad_version=ver(0,11,13), utxoindex=True,  max_receive_size= -1)
+  except (Exception, grpc.RpcError) as e:
+    print(e)
+    cli.close()
+    return get_blocks_detailed(start_block_hash, use_dedicated_node=False, tries=tries+1)
+  try:
+    blocks_detailed = cli.request('getBlocksRequest', {'lowHash' : start_block_hash, 'includeBlocks': True, 'includeTransactions' : True})['getBlocksResponse']['blocks']
+  except (Exception, grpc.RpcError) as e:
+    print(e)
+    cli.close()
+    return get_blocks_detailed(start_block_hash, use_dedicated_node=False, tries=tries+1)
+  cli.close()
+  return blocks_detailed
+
+def estimate_network_hashrate(start_block_hash, window_size, use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
+  if tries == 3:
+    raise Exception
+  cli = RPCClient()
+  try:
+    if use_dedicated_node:
+      cli.connect(HOST_IP, int(HOST_PORT),  max_receive_size= -1)
+    else:
+      cli.auto_connect(min_kaspad_version=ver(0,11,13), utxoindex=True)
+  except (Exception, grpc.RpcError) as e:
+    print(e)
+    cli.close()
+    return estimate_network_hashrate(start_block_hash, use_dedicated_node=False, tries=tries+1)
+  try:
+    network_hashrate = cli.request('estimateNetworkHashesPerSecondRequest', {'windowSize' : window_size, 'startHash' : start_block_hash})['estimateNetworkHashesPerSecondResponse']['networkHashesPerSecond']
+    print('hashrate', network_hashrate)
+  except (Exception, grpc.RpcError) as e:
+    print(e)
+    cli.close()
+    return estimate_network_hashrate(start_block_hash, use_dedicated_node=False, tries=tries+1)
+  cli.close()
+  return int(network_hashrate)

@@ -49,7 +49,6 @@ async def check_impersonations(member_check):
   for guild_member in member_check.guild.members:
       if guild_member.id != member_check.id:
         lev_ratio = 1 - levenshtein_distance(member_check.display_name.lower(), guild_member.display_name.lower()) / max(len(member_check.display_name.lower()), len(guild_member.display_name.lower()))
-        print(lev_ratio)
         if lev_ratio >= 0.75:
           print(f'found {round( lev_ratio*100)} simularity between target :{guild_member.display_name} and impersonator: {member_check.display_name}')
           if random.random() < CALL_FOR_DONATION_PROB:
@@ -124,7 +123,7 @@ async def devfund(cxt, window_size=None, *args):
   '''Display devfund balance'''
   here = True if 'here' in [window_size,] + list(args) else False
   if window_size == None or window_size == 'here':
-    window_size = 120 #daa_window
+    window_size = 86400 #daa_window
   else:
     window_size = int(window_size)
   try:
@@ -132,30 +131,37 @@ async def devfund(cxt, window_size=None, *args):
       dev_addrs.MINING_ADDR,
       dev_addrs.DONATION_ADDR,
       )
-    utxos = kaspa.get_utxo_entries(dev_addrs.MINING_ADDR)
-    percent_of_network = helpers.utxo_percent_of_network(utxos, window_size)
-    print(percent_of_network)
-    msg = ans.DEVFUND(*balances, percent_of_network)
+    utxos = kaspa.get_utxo_entries([dev_addrs.MINING_ADDR,])
+    stats = kaspa.get_stats()
+    network_hashrate = int(stats['hashrate'])
+    cut_off = int(stats['daa_score']) - window_size
+    addr_percent = helpers.mining_stats([dev_addrs.MINING_ADDR,], utxos, cut_off, int(stats['daa_score']))[dev_addrs.MINING_ADDR]['network_percent']
+    addr_hashrate = helpers.hashrate_from_percent_of_network(addr_percent, network_hashrate)
+    addr_hashrate = helpers.normalize_hashrate(addr_hashrate)
+    msg = ans.DEVFUND(*balances, addr_percent, addr_hashrate)
     await _send(cxt, msg, here)
   except Exception as e:
     await _process_exception(cxt, e, here)
 
 @bot.command()
-async def address_stats(cxt, address, window_size = None, *args):
+async def address_stats(cxt, address, window_size = 7200, *args):
   '''Estimate network share associated with address'''
   here = True if 'here' in [window_size,] + list(args) else False
-  if window_size == None or window_size == 'here':
-    window_size = 40 #daa_window
-  else:
-    window_size = int(window_size)
+  if window_size == 'here':
+    window_size = 7200 #2hour 60*60*2
   try:
     balance = int(kaspa.get_balances(address)[0])
-    utxos = kaspa.get_utxo_entries(address)
-    network_hashrate = int(kaspa.get_stats()['hashrate'])
-    addr_percent = helpers.utxo_percent_of_network(utxos, window_size)
+    utxos = kaspa.get_utxo_entries([address,])
+    stats = kaspa.get_stats()
+    start_block = kaspa.get_blocks(stats['pruning_point'])[-window_size]
+    print(start_block)
+    network_hashrate = kaspa.estimate_network_hashrate(start_block, window_size)
+    cut_off = int(stats['daa_score']) - window_size
+    addr_percent = helpers.mining_stats([address,], utxos, cut_off, int(stats['daa_score']))[address]['network_percent']
     addr_hashrate = helpers.hashrate_from_percent_of_network(addr_percent, network_hashrate)
     addr_hashrate = helpers.normalize_hashrate(addr_hashrate)
-    msg = ans.ADDR_STATS(address, balance, addr_percent, addr_hashrate)
+    network_hashrate = helpers.normalize_hashrate(network_hashrate)
+    msg = ans.ADDR_STATS(address, network_hashrate, balance, addr_percent, addr_hashrate, window_size)
     await _send(cxt, msg, here)
   except (Exception, grpc.RpcError) as e:
     await _process_exception(cxt, e, here)
@@ -202,7 +208,6 @@ async def mining_reward(cxt, own_hashrate, suffix=None, *args):
     own_hashrate = own_hashrate + suffix if suffix else own_hashrate
     own_hashrate = helpers.hashrate_to_int(own_hashrate)
     percent_of_network = helpers.percent_of_network(own_hashrate, network_hashrate)
-    print('percent_of_network (minging): ', percent_of_network)
     rewards = helpers.get_mining_rewards(int(stats['daa_score']), percent_of_network)
     msg = ans.MINING_CALC(rewards)
     await _send(cxt, msg, here)
@@ -323,6 +328,34 @@ async def test(cxt, *args):
   except (Exception, grpc.RpcError) as e:
     await _process_exception(cxt, e, here)
 
+@bot.command()
+async def top_miners(cxt, amount = 5, window = 3600, *args):
+  '''WORK IN PROGRESS : Displays info on current top miners''' 
+  here = True if 'here' in (window, amount, *args) else False
+  try:
+    #raise Exception
+    stats = kaspa.get_stats()
+    blocks = kaspa.get_blocks(stats['pruning_point'])
+    target_block = blocks[-3600]
+    print(int(stats)['daa_score'] - int(target_block))
+    detailed_blocks = kaspa.get_blocks_detailed(target_block)
+    print('window', len(detailed_blocks))
+    mining_addrs = dict(list(helpers.get_mining_addresses(detailed_blocks).items())[:20])
+    msg = ans.TOP_GAINERS(mining_addrs)
+    await _send(cxt, msg, here)
+  except (Exception, grpc.RpcError) as e:
+    await _process_exception(cxt, e, here)
+
+@bot.command(hidden=True)
+async def test_get_blocks(cxt, amount, *args):
+  here = True if 'here' in args else False
+  try:
+    blocks = kaspa.get_blocks()[:int(amount)]
+    msg = str([block['transactions'] for block in blocks])
+    await _send(cxt, msg, here)
+  except (Exception, grpc.RpcError) as e:
+    await _process_exception(cxt, e, here)
+
 @bot.command(hidden=True)
 async def test_utxo(cxt, address, amount, *args):
   here = True if 'here' in args else False
@@ -335,7 +368,6 @@ async def test_utxo(cxt, address, amount, *args):
 
 @bot.command(hidden=True)
 async def mining_rewards(cxt, own_hashrate, suffix=None, *args):
-  print(own_hashrate, suffix, args)
   await cxt.invoke(bot.get_command('mining_reward'), own_hashrate=own_hashrate, suffix=suffix, *args)
   
 ## post-processing / routing###

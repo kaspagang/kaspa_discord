@@ -2,7 +2,7 @@ from defines import kaspa_constants as kc
 import re
 import time
 from datetime import datetime
-from difflib import ndiff
+from kbech32 import toAddress as to_address
 
 def adjoin_messages(user_id, blockify = True, *msgs):
   sep="  ==============================================================================="
@@ -17,6 +17,9 @@ def adjoin_messages(user_id, blockify = True, *msgs):
       return f"{nl.join(msgs)}"
     else:
       return f"<@{user_id}> \n\n {nl.join(msgs)}"
+
+def script_to_address(script):
+  return to_address(script)
 
 def sompis_to_kas(sompis, round_amount=None):
   if round:
@@ -33,13 +36,12 @@ def get_current_halving_phase(current_daa_score):
   for phase, def_phase in enumerate(kc.DEFLATIONARY_TABLE.values()):
     if def_phase['daa_range'].start <= current_daa_score < def_phase['daa_range'].stop:
       return phase
-
+  
 def get_coin_supply(target_daa_score):
   if target_daa_score >= list(kc.DEFLATIONARY_TABLE.values())[-1]['daa_range'].start:
     return kc.TOTAL_COIN_SUPPLY
   coin_supply = 0
   for def_phase in kc.DEFLATIONARY_TABLE.values():
-    print(def_phase)
     if target_daa_score in def_phase['daa_range']:
       coin_supply += def_phase['reward_per_daa']*(target_daa_score - def_phase['daa_range'].start)
       break
@@ -64,7 +66,6 @@ def rewards_in_range(daa_start, daa_end):
       mining_rewards += (daa_end - def_phase['daa_range'].start) * def_phase['reward_per_daa']
       break
     else:
-      print(def_phase['reward_per_daa'])
       mining_rewards += (def_phase['daa_range'].stop - def_phase['daa_range'].start -1)*def_phase['reward_per_daa']
   return mining_rewards
 
@@ -78,7 +79,6 @@ def get_mining_rewards(current_daa_score, percent_of_network):
   rewards['week'] = rewards_in_range(current_daa_score, current_daa_score+60*60*24*7)*percent_of_network
   rewards['month'] = rewards_in_range(current_daa_score, current_daa_score+60*60*24*(365.25/12))*percent_of_network            
   rewards['year'] = rewards_in_range(current_daa_score, current_daa_score+60*60*24*(365.25))*percent_of_network
-  print(rewards)
   return rewards
 
 def normalize_hashrate(hashrate :int):
@@ -131,17 +131,41 @@ def extract_hashrate(str_hashrate):
       break
   return val, suffix
 
-def utxo_percent_of_network(utxo_entries, window):
-  coinbase_daas = []
+def mining_stats(addrs, utxo_entries, daa_cut_off, current_daa):
+  mining_stats = dict()
   for utxo_entry in utxo_entries:
-    if 'isCoinbase' in utxo_entry['utxoEntry'].keys() and utxo_entry['utxoEntry']['isCoinbase']:
-      coinbase_daas.append(int(utxo_entry['utxoEntry']['blockDaaScore']))
-  coinbase_daas.sort(reverse=True)
-  if len(coinbase_daas) > window:
-    coinbase_daas = coinbase_daas[:window]
-  daa_diff = int(coinbase_daas[0]) - int(coinbase_daas[-1])
-  return len(coinbase_daas[:-1]) / daa_diff
-
+    if 'isCoinbase' in utxo_entry['utxoEntry'].keys() and utxo_entry['utxoEntry']['isCoinbase'] and int(utxo_entry['utxoEntry']['blockDaaScore']) >= daa_cut_off:
+      if utxo_entry['address'] in mining_stats:
+        mining_stats[utxo_entry['address']]['daas'].append(int(utxo_entry['utxoEntry']['blockDaaScore']))
+      else:
+        mining_stats[utxo_entry['address']] = dict()
+        mining_stats[utxo_entry['address']]['daas']= list()
+        mining_stats[utxo_entry['address']]['daas'] = [int(utxo_entry['utxoEntry']['blockDaaScore']),]
+  for stat in mining_stats.values():
+    stat['daas'] = sorted(stat['daas'], reverse=True)
+    '''
+    if len(stat['daas']) >= 3:
+      stat['average_daa_dist'] = sum([stat['daas'][i] - stat['daas'][i+1] for i, _ in enumerate(stat['daas'][:-1])])
+    else: 
+      stat['average_daa_dist'] =  0
+    #stat['network_percent'] = 1 / stat['average_daa_dist']
+    '''
+    stat['network_percent'] = len(stat['daas']) / (current_daa -daa_cut_off)
+  return mining_stats
+    
+def get_mining_addresses(blocks):
+  addrs = dict()
+  for block in blocks:
+    for transaction in block['transactions']:
+      if 'payload' in transaction and transaction['payload']:
+        for output in transaction['outputs']:
+          if output['verboseData']['scriptPublicKeyAddress'] in addrs:
+            addrs[output['verboseData']['scriptPublicKeyAddress']] += 1
+          else:
+             addrs[output['verboseData']['scriptPublicKeyAddress']] = 1
+  addrs = {k: str(round((v/sum(addrs.values()))*100, 1)) + '%' for k, v in sorted(addrs.items(), key=lambda item: item[1], reverse = True)}
+  return addrs
+  
 #work in progress
 
 def deflationay_phases(current_daa_score, start=None, end=None):

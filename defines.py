@@ -1,5 +1,7 @@
 import os
 import pprint as pp
+import datetime
+
 
 DEV_ID = os.environ['DEV_ID']
 TOKEN = os.environ['TOKEN']
@@ -41,9 +43,12 @@ TRY_DEDICATED_NODE = True
 #will lower probability when I receive donations
 #will increase probability when I invest time into it
 # -> 5k = 1 point increase
-CALL_FOR_DONATION_PROB = 1/26
+CALL_FOR_DONATION_PROB = 1/23.3
 
 #starting changelog:
+#Increase for $address_stats calcs      -1
+#Decrease for 1.111k kaspa                  + ~0.3
+#Increase for $top_gainers              -2
 #Increase for $address_stats            -2
 #Increase for impersonation detection:  -5
 #Increase for $halving:                 -7
@@ -520,7 +525,7 @@ INFO: <@{imp_id}> has registered the display-name `{imp_name}`, which is similar
     Total supply        : {kaspa_constants.TOTAL_COIN_SUPPLY:,} KAS
     Percent mined       : {round(circulating_coins/kaspa_constants.TOTAL_COIN_SUPPLY*100, 2)}%'''
     
-    DEVFUND = lambda mining_addr_value, donation_addr_value, percent_of_network : f'''
+    DEVFUND = lambda mining_addr_value, donation_addr_value, percent_of_network, hashrate : f'''
   =======================================================================
   Donation addresses:
 
@@ -532,21 +537,25 @@ INFO: <@{imp_id}> has registered the display-name `{imp_name}`, which is similar
   Mining addresses:
 
     • {devfund_addresses.MINING_ADDR}
+
+        Network Share       : {round(percent_of_network*100, 4)} % (Approx.)
+        Effective Hashrate  : {hashrate} (Approx.)
     
   -----------------------------------------------------------------------
-    Amount: {int(mining_addr_value):,} KAS, (Approx. share of network: {round(percent_of_network*100, 2)}%)
+    Amount: {int(mining_addr_value):,} KAS
   =======================================================================
   TOTAL:    {int(mining_addr_value + donation_addr_value):,} KAS'''
 
     BALANCE = lambda balance : f'''
     {balance:,} KAS'''
 
-    ADDR_STATS = lambda address, balance, addr_percent, addr_hashrate: f'''
+    ADDR_STATS = lambda address, network_hashrate, balance, addr_percent, addr_hashrate, window_size: f'''
     • {address}:  
-        Balance       : {round(balance)} KAS
-        Network Share : {round(addr_percent*100, 4)} %
-        Hashrate      : {addr_hashrate}
-    '''
+        Balance              : {round(balance)} KAS
+        Network Hashrate     : {network_hashrate}
+        Network Share        : {round(addr_percent*100, 4)} %
+        Effective Hashrate   : {addr_hashrate}
+            *Measured over the last:  {str(datetime.timedelta(seconds=window_size)).split(':')[0]} Hrs, {str(datetime.timedelta(seconds=window_size)).split(':')[1]} Mins, {str(datetime.timedelta(seconds=window_size)).split(':')[2]} Secs'''
 
     SUGGESTION = f'''
     Thanks for your suggestion!'''
@@ -557,8 +566,7 @@ INFO: <@{imp_id}> has registered the display-name `{imp_name}`, which is similar
     CONSIDER_DONATION = f'''
     Please consider a donation:
     Kasper : {kasper_addresses.DONATION_ADDR}
-    Devfund: {devfund_addresses.DONATION_ADDR}
-    '''
+    Devfund: {devfund_addresses.DONATION_ADDR}'''
 
     USEFUL_LINKS = '''
   Kaspa website: 
@@ -604,8 +612,15 @@ INFO: <@{imp_id}> has registered the display-name `{imp_name}`, which is similar
     DONATION_ADDRS = f'''
   Please consider a donation:
   • KasperBot: 
-    {kasper_addresses.DONATION_ADDR}
-  '''
+    {kasper_addresses.DONATION_ADDR}'''
+
+    def TOP_GAINERS(miners):
+      TG_MSG = list()
+      i = 1
+      for mining_address, percent in miners.items():
+        TG_MSG.append(str(i) + ') ' + mining_address + ': ' + percent)
+        i += 1
+      return '\n'.join(TG_MSG)
 
     def DEF_INFO(phases, current_datetime, current_supply):
       def_msgs = list()
