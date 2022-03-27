@@ -1,7 +1,7 @@
 import discord
 import asyncio
 from discord.ext import commands
-from keep_alive import keep_alive
+#from keep_alive import keep_alive
 import kaspa
 import random
 from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB, INTERVAL, TRADE_OFFER_CHANS, DONATORS, TRADE_DIS_INTERVALS, SER_TO_TRADE_CHANS)
@@ -11,7 +11,7 @@ import grpc
 import traceback
 from Levenshtein import distance as levenshtein_distance
 
-keep_alive()
+#keep_alive()
 intents = discord.Intents.default().all()
 bot = commands.Bot(command_prefix='$', intents=intents)
 
@@ -197,9 +197,11 @@ async def mining_reward(cxt, own_hashrate, suffix=None, *args):
       
       Input: <float_or_integer>xH/s (without spaces!)
       
-      Formular: <own_h/s>/<net_h/s>*500*<timeframe_in_secounds>
-      
-      Disclaimer: output is only an approximation, and influenced by current dips and spikes in the network hashrate, as well as growth of the network over time. Also, halving events are currently not included in the calculation. 
+      Formular: (<own_h/s>/<net_h/s> x reward x <timeframe_in_secounds>)*
+
+      *Halving events are integrated into the reward calculation over the timeframe.
+  
+      Disclaimer: output is only an approximation, and influenced by current dips and spikes in the network hashrate, as well as growth of the network over time.
   '''
   here = True if 'here' in [suffix, *args] else False
   try:
@@ -336,8 +338,7 @@ async def top_miners(cxt, amount = 5, window = 3600, *args):
     #raise Exception
     stats = kaspa.get_stats()
     blocks = kaspa.get_blocks(stats['pruning_point'])
-    target_block = blocks[-3600]
-    print(int(stats)['daa_score'] - int(target_block))
+    target_block = blocks[-100]
     detailed_blocks = kaspa.get_blocks_detailed(target_block)
     print('window', len(detailed_blocks))
     mining_addrs = dict(list(helpers.get_mining_addresses(detailed_blocks).items())[:20])
