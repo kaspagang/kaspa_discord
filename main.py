@@ -1,8 +1,6 @@
 import discord
 import asyncio
 from discord.ext import commands
-#from keep_alive import keep_alive
-import kaspa
 import random
 from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB, INTERVAL, TRADE_OFFER_CHANS, DONATORS, TRADE_DIS_INTERVALS, SER_TO_TRADE_CHANS)
 import helpers
@@ -11,7 +9,6 @@ import grpc
 import traceback
 from Levenshtein import distance as levenshtein_distance
 
-#keep_alive()
 intents = discord.Intents.default().all()
 bot = commands.Bot(command_prefix='$', intents=intents)
 
