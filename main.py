@@ -2,7 +2,7 @@ import discord
 import asyncio
 from discord.ext import commands
 import random
-from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB, INTERVAL, TRADE_OFFER_CHANS, DONATORS, TRADE_DIS_INTERVALS, SER_TO_TRADE_CHANS)
+from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB, INTERVAL, TRADE_OFFER_CHANS, DONATORS, TRADE_DIS_INTERVALS, SER_TO_TRADE_CHANS, UNICODE_TRANSLATION_TABLE)
 import helpers
 import kaspa
 from requests import get
@@ -29,24 +29,38 @@ async def on_member_update(member_before, member_after):
     print(f'checking altered user: {member_before.display_name} -> {member_after.display_name}')
     await check_impersonations(member_after)
 
-'''
 @bot.event
 async def on_user_update(member_before, member_after):
   #print(f'user updated: {member_before.display_name} -> {member_after.display_name}')
   if member_before.display_name != member_after.display_name:
     print(f'checking altered user: {member_before.display_name} -> {member_after.display_name}')
     await check_impersonations(member_after)
-'''
 
 @bot.event
 async def on_member_join(member_new):
   #print(f'checking new user: {member_new}')
   await check_impersonations(member_new)    
-   
+
+@bot.event
+async def on_message(msg):
+  pass
+
 async def check_impersonations(member_check):
-  for guild_member in member_check.guild.members:
+  for guild in bot.guilds:
+    for member in guild.members:
+        if member.id == member_check.id:
+          target_guild = guild
+          break
+  for guild_member in target_guild.members:
       if guild_member.id != member_check.id:
-        lev_ratio = 1 - levenshtein_distance(member_check.display_name.lower(), guild_member.display_name.lower()) / max(len(member_check.display_name.lower()), len(guild_member.display_name.lower()))
+        guild_member_norm_name = guild_member.display_name.translate(UNICODE_TRANSLATION_TABLE).lower()
+        member_check_norm_name = member_check.display_name.translate(UNICODE_TRANSLATION_TABLE).lower()
+        lev_ratio = 1 - levenshtein_distance(
+                member_check_norm_name, 
+                guild_member_norm_name) / max(
+                        len(member_check.display_name.lower()),
+                        len(guild_member.display_name.lower())
+                        )
         if lev_ratio >= 0.75:
           print(f'found {round( lev_ratio*100)} simularity between target :{guild_member.display_name} and impersonator: {member_check.display_name}')
           if random.random() < CALL_FOR_DONATION_PROB:
