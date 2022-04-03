@@ -41,10 +41,6 @@ async def on_member_join(member_new):
   #print(f'checking new user: {member_new}')
   await check_impersonations(member_new)    
 
-@bot.event
-async def on_message(msg):
-  pass
-
 async def check_impersonations(member_check):
   for guild in bot.guilds:
     for member in guild.members:
