@@ -514,7 +514,17 @@ class kasper_addresses:
 class answers:
     DISCLAIMER = '''Disclaimer:
   
-  This is a kind reminder that #trade channel is not moderated by the server mods, core devs, treasurers or any other constituents of the Kaspa community. This channel was created to accommodate traders which bogged down the community channel, having created it does not impose any responsibility for the actions of any buyer, seller, escrow service etc. on any particular community member. Please be mindful of that and careful with your money.'''
+  This is a kind reminder that #trade channel is not moderated by the server mods, core devs, treasurers or any other constituents of the Kaspa community. This channel was created to accommodate traders which bogged down the community channel, having created it does not impose any responsibility for the actions of any buyer, seller, escrow service etc. on any particular community member. Please be mindful of that and careful with your money.
+  
+Things to Consider, for a safe trade:
+  - Do not Trade through external group chats.
+       -> External Groups, and group members therein, may be impersonators.
+  - Verify the trading partner is not impersonating another community member
+  - Ask about prior experiences regarding a trader in the #trade-talk channel
+  - Let the trade run through an escrow of a trusted community member.
+  - Sending full amounts when doing a first trade with someone. 
+        -> Establish a relation first by trading in smaller batches.
+  '''
 
     SIMILAR_MEMBER = lambda imp_id, imp_name, target_id, target_name, lev_per : f'''
 INFO: <@{imp_id}> with member id: `{imp_id}` has registered the display-name `{imp_name}`, which is similar to the pre-existing display-name of `{target_name}`, from user <@{target_id}> with member id: `{target_id}` (similarity score: {round(lev_per*100)} %).
