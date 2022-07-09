@@ -2,7 +2,6 @@ from defines import kaspa_constants as kc
 import re
 import time
 from datetime import datetime
-from kbech32 import toAddress as to_address
 
 def adjoin_messages(user_id, blockify = True, *msgs):
   sep="  ==============================================================================="

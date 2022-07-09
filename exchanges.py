@@ -2,7 +2,7 @@ import requests
 import json
 import datetime
 
-'''Not implemented yet'''
+## Barebones: Not Working, Not implemented yet
 
 EXIBTRON = 'exibitron'
 TXBIT = 'txbit'
@@ -35,7 +35,7 @@ def create_ex_pair_from_base(base_asset, exchange):
                 raise Exception
         
 def get_trades(base_asset, exchnage, limit=10):
-        if exchnage.lower() 
+        pass
 
 def get_trades_exibitron(base_asset, limit=10):
         ex_pair = create_ex_pair_from_base(base_asset, EXIBTRON)
@@ -44,10 +44,10 @@ def get_trades_exibitron(base_asset, limit=10):
                 'exchange': EXIBTRON,
                 'pair' : format_pair_from_base(base_asset),
                 'trades' : [
-                        {       'Side' : 'Sell' if else 'buy'
+                        {       'Side' : 'Sell' if _ else 'buy'
                                 'Amount' : float(trade['Quantity']), 
                                 'Price' : float(trade['Price']),
-                                'time' : datetime.datetime.fromtimestamp(float(trade['Tiestamp']))
+                                'time' : datetime.datetime.fromtimestamp(float(trade['Tiestamp'])),
                          } for trade in response
                         ]                    
         }
