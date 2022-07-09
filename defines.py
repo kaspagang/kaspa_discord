@@ -507,23 +507,29 @@ class kaspa_constants:
 class devfund_addresses:
     MINING_ADDR = 'kaspa:pzhh76qc82wzduvsrd9xh4zde9qhp0xc8rl7qu2mvl2e42uvdqt75zrcgpm00'
     DONATION_ADDR = 'kaspa:precqv0krj3r6uyyfa36ga7s0u9jct0v4wg8ctsfde2gkrsgwgw8jgxfzfc98'
+    REWRITE_ADDR = 'kaspa:pp08y9g9epsp69t29uvm3d6hmqz9zmgzandt6j6y8fazj02hx8756jmumpgpa'
 
 class kasper_addresses:
     DONATION_ADDR = 'kaspa:qp33anhdnnsfzg474jd3s5csuaf0k9kn6cvy3pfcx9rnezak5qkhgskuztcum'
 
 class answers:
+        
+    def EXCHANGE_INFO(exchange, pair):
+        pass
+        
+    def TRADES(trades):
+        pass
+
+    def ORDERBOOK(orderbook):
+        pass
+
+    def TICKER(ticker):
+        pass
+
     DISCLAIMER = '''Disclaimer:
   
   This is a kind reminder that #trade channel is not moderated by the server mods, core devs, treasurers or any other constituents of the Kaspa community. This channel was created to accommodate traders which bogged down the community channel, having created it does not impose any responsibility for the actions of any buyer, seller, escrow service etc. on any particular community member. Please be mindful of that and careful with your money.
   
-Things to Consider, for a safe trade:
-  - Do not Trade through external group chats.
-       -> External Groups, and group members therein, may be impersonators.
-  - Verify the trading partner is not impersonating another community member
-  - Ask about prior experiences regarding a trader in the #trade-talk channel
-  - Let the trade run through an escrow of a trusted community member.
-  - Sending full amounts when doing a first trade with someone. 
-        -> Establish a relation first by trading in smaller batches.
   '''
 
     SIMILAR_MEMBER = lambda imp_id, imp_name, target_id, target_name, lev_per : f'''
@@ -584,40 +590,8 @@ INFO: <@{imp_id}> with member id: `{imp_id}` has registered the display-name `{i
     
     CONSIDER_DONATION = f'''
     Please consider a donation:
-    Kasper : {kasper_addresses.DONATION_ADDR}
-    Devfund: {devfund_addresses.DONATION_ADDR}'''
-
-    USEFUL_LINKS = '''
-  Kaspa website: 
-    https://kaspanet.org/
-  Source code: 
-    https://github.com/kaspanet/kaspad
-  Quick start guide:
-    tinyurl.com/ym8sbas7
-  Node bootstrap:
-    http://kaspadbase.com/
-  Kaspa Wiki:
-    https://kaspawiki.net/
-  Kaspa for desktop (KDX):
-    https://kdx.app/
-  Web wallet:
-    https://wallet.kaspanet.io/
-  Paper wallet generator:
-    https://github.com/svarogg/kaspaper/releases/latest 
-  Faucet:
-    https://faucet.kaspanet.io/
-  Dashboards:
-    http://kasboard-mainnet.daglabs-dev.com/
-    http://kasboard.cbytensky.org/
-  Livefeed:
-    http://kgi-mainnet.daglabs-dev.com/
-  Block explorers:
-    http://katnip.cbytensky.org/
-    http://blockexplorer.kaspanet.org/
-  Cpu-miner:
-    https://github.com/elichai/kaspa-miner/releases
-  Gpu-miner:
-    https://github.com/tmrlvi/kaspa-miner/releases'''
+    Devfund: {devfund_addresses.DONATION_ADDR}
+    Rust Rewrite Effort: {devfund_addresses.REWRITE_ADDR}'''
 
     MINING_CALC = lambda rewards : f'''
   KAS / sec   :  {rewards['secound']:,}
@@ -630,7 +604,9 @@ INFO: <@{imp_id}> with member id: `{imp_id}` has registered the display-name `{i
 
     DONATION_ADDRS = f'''
   Please consider a donation:
-  • KasperBot: 
+  • Devfund: 
+    {kasper_addresses.DONATION_ADDR}
+  • Rust Rewrite Effort: 
     {kasper_addresses.DONATION_ADDR}'''
 
     def TOP_GAINERS(miners):

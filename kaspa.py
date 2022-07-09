@@ -154,3 +154,26 @@ def estimate_network_hashrate(start_block_hash, window_size, use_dedicated_node=
     return estimate_network_hashrate(start_block_hash, window_size, use_dedicated_node=False, tries=tries+1)
   cli.close()
   return int(network_hashrate)
+
+def get_circ_supply(start_block_hash, window_size, use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
+  if tries == 3:
+    raise Exception
+  cli = RPCClient()
+  try:
+    if use_dedicated_node:
+      cli.connect(HOST_IP, int(HOST_PORT),  max_receive_size= -1)
+    else:
+      cli.auto_connect(min_kaspad_version=ver(0,11,13), utxoindex=True)
+  except (Exception, grpc.RpcError) as e:
+    print(e)
+    cli.close()
+    return estimate_network_hashrate(start_block_hash, window_size, use_dedicated_node=False, tries=tries+1)
+  try:
+    network_hashrate = cli.request('estimateNetworkHashesPerSecondRequest', {'windowSize' : window_size, 'startHash' : start_block_hash})['estimateNetworkHashesPerSecondResponse']['networkHashesPerSecond']
+    print('hashrate', network_hashrate)
+  except (Exception, grpc.RpcError) as e:
+    print(e)
+    cli.close()
+    return estimate_network_hashrate(start_block_hash, window_size, use_dedicated_node=False, tries=tries+1)
+  cli.close()
+  return int(network_hashrate)
