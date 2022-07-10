@@ -334,8 +334,8 @@ async def halving(cxt, start=None, end=None, *args):
   '''Display progress of deflationary periods'''
   here = True if 'here' in [start, end, *args] else False
   try:
-    stats = helpers.sompis_to_kas(kaspa.get_stats())
-    circ_supply = kaspa.get_circ_supply()
+    stats = kaspa.get_stats()
+    circ_supply = helpers.sompis_to_kas(kaspa.get_circ_supply())
     if start == 'here':
       start = None
     if end =='here':
