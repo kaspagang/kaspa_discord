@@ -565,7 +565,7 @@ INFO: <@{imp_id}> with member id: `{imp_id}` has registered the display-name `{i
     24-hr High          : {market_data["high"]:,} {market_data["quote"]}         (per 1 Million KAS)
     24-hr Low           : {market_data["low"]:,} {market_data["quote"]}         (per 1 Million KAS)
     
-    24-hr Price-Change  : {round(float(market_data["price_change"])*100, 3):,} % {market_data["quote"]}'''
+    24-hr Price-Change  : {round(float(market_data["price_change"]), 3):,} % {market_data["quote"]}'''
     
     VALUE = lambda market_data : f'''
     {float(market_data['value'])} {market_data["quote"]} per 1 Million KAS'''
