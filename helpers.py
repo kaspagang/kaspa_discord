@@ -33,6 +33,18 @@ def get_current_halving_phase(current_daa_score):
     if def_phase['daa_range'].start <= current_daa_score < def_phase['daa_range'].stop:
       return phase
 
+def get_coin_supply(target_daa_score):
+  if target_daa_score >= list(kc.DEFLATIONARY_TABLE.values())[-1]['daa_range'].start:
+    return kc.TOTAL_COIN_SUPPLY
+  coin_supply = 0
+  for def_phase in kc.DEFLATIONARY_TABLE.values():
+    if target_daa_score in def_phase['daa_range']:
+      coin_supply += def_phase['reward_per_daa']*(target_daa_score - def_phase['daa_range'].start)
+      break
+    else:
+      coin_supply += def_phase['reward_per_daa']*(def_phase['daa_range'].stop - def_phase['daa_range'].start-1)
+  return round(coin_supply)
+
 def rewards_in_range(daa_start, daa_end):
   if daa_start >= list(kc.DEFLATIONARY_TABLE.values())[-1]['daa_range'].start:
     return 0
