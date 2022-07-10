@@ -17,8 +17,6 @@ def adjoin_messages(user_id, blockify = True, *msgs):
     else:
       return f"<@{user_id}> \n\n {nl.join(msgs)}"
 
-def script_to_address(script):
-  return to_address(script)
 
 def sompis_to_kas(sompis, round_amount=None):
   if round:
@@ -28,25 +26,12 @@ def sompis_to_kas(sompis, round_amount=None):
 def daa_score_to_date(current_daa, target_daa, current_timestamp):
   current_timestamp = round(current_timestamp)
   daa_diff = target_daa - current_daa
-  return datetime.utcfromtimestamp(current_timestamp + round(daa_diff*0.99166666666)).strftime('%d-%m-%Y %H:%M:%S')
-#0.99166666666
+  return datetime.utcfromtimestamp(current_timestamp + round(daa_diff*1)).strftime('%d-%m-%Y %H:%M:%S')
   
 def get_current_halving_phase(current_daa_score):
   for phase, def_phase in enumerate(kc.DEFLATIONARY_TABLE.values()):
     if def_phase['daa_range'].start <= current_daa_score < def_phase['daa_range'].stop:
       return phase
-  
-def get_coin_supply(target_daa_score):
-  if target_daa_score >= list(kc.DEFLATIONARY_TABLE.values())[-1]['daa_range'].start:
-    return kc.TOTAL_COIN_SUPPLY
-  coin_supply = 0
-  for def_phase in kc.DEFLATIONARY_TABLE.values():
-    if target_daa_score in def_phase['daa_range']:
-      coin_supply += def_phase['reward_per_daa']*(target_daa_score - def_phase['daa_range'].start)
-      break
-    else:
-      coin_supply += def_phase['reward_per_daa']*(def_phase['daa_range'].stop - def_phase['daa_range'].start-1)
-  return round(coin_supply)
 
 def rewards_in_range(daa_start, daa_end):
   if daa_start >= list(kc.DEFLATIONARY_TABLE.values())[-1]['daa_range'].start:
@@ -164,6 +149,12 @@ def get_mining_addresses(blocks):
              addrs[output['verboseData']['scriptPublicKeyAddress']] = 1
   addrs = {k: str(round((v/sum(addrs.values()))*100, 1)) + '%' for k, v in sorted(addrs.items(), key=lambda item: item[1], reverse = True)}
   return addrs
+
+def get_market_caps(current_value, circ_supply):
+        market_caps = dict()
+        market_caps["circ_m-cap"] = circ_supply * current_value / 1_000_000
+        market_caps["dil_m-cap"] = kc.TOTAL_COIN_SUPPLY * current_value / 1_000_000
+        return market_caps
   
 #work in progress
 

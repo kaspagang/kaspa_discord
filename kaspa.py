@@ -14,7 +14,7 @@ def get_balances(*addrs, use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
     if use_dedicated_node:
       cli.connect(HOST_IP, int(HOST_PORT))
     else:
-      cli.auto_connect(min_kaspad_version=ver(0,11,12), utxoindex=True)
+      cli.auto_connect(min_kaspad_version=ver(0,12,3), utxoindex=True)
   except (Exception, grpc.RpcError) as e:
     cli.close()
     return get_balances(use_dedicated_node=False, tries=tries+1)
@@ -41,7 +41,7 @@ def get_stats(use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
     if use_dedicated_node:
       cli.connect(HOST_IP, int(HOST_PORT))
     else:
-      cli.auto_connect(min_kaspad_version=ver(0,11,12), utxoindex=True)
+      cli.auto_connect(min_kaspad_version=ver(0,12,3), utxoindex=True)
   except (Exception, grpc.RpcError) as e:
     print(e)
     cli.close()
@@ -73,7 +73,7 @@ def get_utxo_entries(addrs, use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
     if use_dedicated_node:
       cli.connect(HOST_IP, int(HOST_PORT),  max_receive_size= -1)
     else:
-      cli.auto_connect(min_kaspad_version=ver(0,11,13), utxoindex=True, max_receive_size= -1)
+      cli.auto_connect(min_kaspad_version=ver(0,12,3), utxoindex=True, max_receive_size= -1)
   except (Exception, grpc.RpcError) as e:
     cli.close()
     return get_utxo_entries(use_dedicated_node=False, tries=tries+1)
@@ -96,7 +96,7 @@ def get_blocks(start_block_hash, use_dedicated_node=TRY_DEDICATED_NODE, tries = 
     if use_dedicated_node:
       cli.connect(HOST_IP, int(HOST_PORT),  max_receive_size= -1)
     else:
-      cli.auto_connect(min_kaspad_version=ver(0,11,13), utxoindex=True,  max_receive_size= -1)
+      cli.auto_connect(min_kaspad_version=ver(0,12,3), utxoindex=True,  max_receive_size= -1)
   except (Exception, grpc.RpcError) as e:
     print(e)
     cli.close()
@@ -118,7 +118,7 @@ def get_blocks_detailed(start_block_hash, use_dedicated_node=TRY_DEDICATED_NODE,
     if use_dedicated_node:
       cli.connect(HOST_IP, int(HOST_PORT),  max_receive_size= -1)
     else:
-      cli.auto_connect(min_kaspad_version=ver(0,11,13), utxoindex=True,  max_receive_size= -1)
+      cli.auto_connect(min_kaspad_version=ver(0,12,3), utxoindex=True,  max_receive_size= -1)
   except (Exception, grpc.RpcError) as e:
     print(e)
     cli.close()
@@ -140,7 +140,7 @@ def estimate_network_hashrate(start_block_hash, window_size, use_dedicated_node=
     if use_dedicated_node:
       cli.connect(HOST_IP, int(HOST_PORT),  max_receive_size= -1)
     else:
-      cli.auto_connect(min_kaspad_version=ver(0,11,13), utxoindex=True)
+      cli.auto_connect(min_kaspad_version=ver(0,12,3), utxoindex=True)
   except (Exception, grpc.RpcError) as e:
     print(e)
     cli.close()
@@ -163,17 +163,16 @@ def get_circ_supply(start_block_hash, window_size, use_dedicated_node=TRY_DEDICA
     if use_dedicated_node:
       cli.connect(HOST_IP, int(HOST_PORT),  max_receive_size= -1)
     else:
-      cli.auto_connect(min_kaspad_version=ver(0,11,13), utxoindex=True)
+      cli.auto_connect(min_kaspad_version=ver(0,12,3), utxoindex=True)
   except (Exception, grpc.RpcError) as e:
     print(e)
     cli.close()
-    return estimate_network_hashrate(start_block_hash, window_size, use_dedicated_node=False, tries=tries+1)
+    return get_circ_supply(start_block_hash, window_size, use_dedicated_node=False, tries=tries+1)
   try:
-    network_hashrate = cli.request('estimateNetworkHashesPerSecondRequest', {'windowSize' : window_size, 'startHash' : start_block_hash})['estimateNetworkHashesPerSecondResponse']['networkHashesPerSecond']
-    print('hashrate', network_hashrate)
+    circ_supply = cli.request('getCoinSupplyRequest', {})['circulatingSompi']
   except (Exception, grpc.RpcError) as e:
     print(e)
     cli.close()
-    return estimate_network_hashrate(start_block_hash, window_size, use_dedicated_node=False, tries=tries+1)
+    return get_circ_supply(start_block_hash, window_size, use_dedicated_node=False, tries=tries+1)
   cli.close()
-  return int(network_hashrate)
+  return round(float(circ_supply))

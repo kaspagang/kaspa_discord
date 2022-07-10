@@ -2,12 +2,14 @@ import discord
 import asyncio
 from discord.ext import commands
 import random
+
 from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB, INTERVAL, TRADE_OFFER_CHANS, DONATORS, TRADE_DIS_INTERVALS, SER_TO_TRADE_CHANS, UNICODE_TRANSLATION_TABLE)
 import helpers
 import kaspa
 from requests import get
 import grpc
 import traceback
+import cryptoinfo
 from Levenshtein import distance as levenshtein_distance
 
 intents = discord.Intents.default().all()
@@ -114,20 +116,19 @@ async def trade_disclaimer(chan_id):
     await trade_chan.send(msg)
 
 ## commands ###
-
-## Exchanges ##
-        #To DO
         
 @bot.command()
 async def balance(cxt, address, *args):
-  '''Get balance of address'''
+  '''Get balance of address
+     Note: command will fail if balance = 0
+  '''
   here = True if 'here' in args else False
   try:
     balances = kaspa.get_balances(address)
     msg = ans.BALANCE(*balances)
     await _send(cxt, msg, here)
   except (Exception, grpc.RpcError) as e:
-    await _process_exception(cxt, e, here)
+    await _process_exception_balance(cxt, e, here)
 
 @bot.command()
 async def devfund(cxt, window_size=None, *args):
@@ -155,8 +156,12 @@ async def devfund(cxt, window_size=None, *args):
     await _process_exception(cxt, e, here)
 
 @bot.command()
-async def address_stats(cxt, address, window_size = 7200, *args):
-  '''Estimate network share associated with address'''
+async def address_mining(cxt, address, window_size = 7200, *args):
+  '''Estimate network share associated with address
+     note: this command will fail if 
+              1) a certain treshold of mining is not met
+              2) address is mining to a pool
+  '''
   here = True if 'here' in [window_size,] + list(args) else False
   if window_size == 'here':
     window_size = 7200 #2hour 60*60*2
@@ -175,7 +180,7 @@ async def address_stats(cxt, address, window_size = 7200, *args):
     msg = ans.ADDR_STATS(address, network_hashrate, balance, addr_percent, addr_hashrate, window_size)
     await _send(cxt, msg, here)
   except (Exception, grpc.RpcError) as e:
-    await _process_exception(cxt, e, here)
+    await _process_exception_address_minging(cxt, e, here)
 
 
 @bot.command()
@@ -190,17 +195,6 @@ async def hashrate(cxt, *args):
   except (Exception, grpc.RpcError) as e:
     print(e)
     await _process_exception(cxt, e, here)
-
-@bot.command()
-async def useful_links(cxt, *args):
-  '''List of useful links'''
-  here = True if 'here' in args else False
-  try:
-    msg = ans.USEFUL_LINKS
-    await _send(cxt, msg, here, blockify=False)
-  except (Exception, grpc.RpcError) as e:
-    await _process_exception(cxt, e, here)
-
 
 @bot.command()
 async def mining_reward(cxt, own_hashrate, suffix=None, *args):
@@ -299,12 +293,41 @@ async def coin_supply(cxt, *args):
   '''Get current coin supply'''
   here = True if 'here' in args else False
   try:
-    stats = kaspa.get_stats()
-    circ_supply = helpers.get_coin_supply(int(stats['daa_score']))
+    circ_supply = kaspa.get_circ_supply()
     msg = ans.COIN_STATS(circ_supply)
     await _send(cxt, msg, here)
   except (Exception, grpc.RpcError) as e:
     await _process_exception(cxt, e, here)
+    
+@bot.command()
+async def market_data(cxt, quote_asset = "usd", *args):
+  '''Get market_data'''
+  here = True if 'here' in [quote_asset, *args] else False
+  if quote_asset == None | quote_asset == "here":
+          quote_asset = 'usd'
+  try:
+    circ_supply = kaspa.get_circ_supply()
+    market_data = cryptoinfo.kaspa_market_info(quote_asset)
+    market_data.update(helpers.get_market_caps(market_data["value"], circ_supply))
+    msg = ans.MARKET_DATA(circ_supply)
+    await _send(cxt, msg, here)
+  except (Exception, grpc.RpcError) as e:
+    await _process_exception(cxt, e, here)
+
+@bot.command()
+async def value(cxt, quote_asset = "usd", *args):
+  '''Get Kas value per 1M'''
+  here = True if 'here' in [quote_asset, *args] else False
+  if quote_asset == None | quote_asset == "here":
+          quote_asset = 'usd'
+  try:
+    circ_supply = kaspa.get_circ_supply()
+    market_data = cryptoinfo.kaspa_market_info(quote_asset)
+    msg = ans.VALUE(market_data)
+    await _send(cxt, msg, here)
+  except (Exception, grpc.RpcError) as e:
+    await _process_exception(cxt, e, here)
+
 
 @bot.command()
 async def halving(cxt, start=None, end=None, *args):
@@ -312,6 +335,7 @@ async def halving(cxt, start=None, end=None, *args):
   here = True if 'here' in [start, end, *args] else False
   try:
     stats = kaspa.get_stats()
+    circ_supply = kaspa.get_circ_supply()
     if start == 'here':
       start = None
     if end =='here':
@@ -319,9 +343,8 @@ async def halving(cxt, start=None, end=None, *args):
     if start == 'all':
       start = 0
       end = 426
-    current_supply = helpers.get_coin_supply(int(stats['daa_score']))
     phase_info, current_date, = helpers.deflationay_phases(int(stats['daa_score']), start, end)
-    msg = ans.DEF_INFO(phase_info, current_date, current_supply)
+    msg = ans.DEF_INFO(phase_info, current_date, circ_supply)
     await _send(cxt, msg, here)
   except (Exception, grpc.RpcError) as e:
     await _process_exception(cxt, e, here)
@@ -359,26 +382,6 @@ async def top_miners(cxt, amount = 5, window = 3600, *args):
     await _process_exception(cxt, e, here)
 
 @bot.command(hidden=True)
-async def test_get_blocks(cxt, amount, *args):
-  here = True if 'here' in args else False
-  try:
-    blocks = kaspa.get_blocks()[:int(amount)]
-    msg = str([block['transactions'] for block in blocks])
-    await _send(cxt, msg, here)
-  except (Exception, grpc.RpcError) as e:
-    await _process_exception(cxt, e, here)
-
-@bot.command(hidden=True)
-async def test_utxo(cxt, address, amount, *args):
-  here = True if 'here' in args else False
-  try:
-    utxo = kaspa.get_utxo_entries(address)[:int(amount)]
-    msg = str(utxo)
-    await _send(cxt, msg, here)
-  except (Exception, grpc.RpcError) as e:
-    await _process_exception(cxt, e, here)
-
-@bot.command(hidden=True)
 async def mining_rewards(cxt, own_hashrate, suffix=None, *args):
   await cxt.invoke(bot.get_command('mining_reward'), own_hashrate=own_hashrate, suffix=suffix, *args)
   
@@ -409,8 +412,21 @@ async def _process_exception(cxt, e, here):
   msg = ans.FAILED(recv_msg)
   await _send(cxt, msg, here)
   
+async def _process_exception_address_minging(cxt, e, here):
+  print(e, traceback.format_exc())
+  recv_msg = str(cxt.message.content)
+  msg = ans.FAILED_ADDR_MINING(recv_msg)
+  await _send(cxt, msg, here)
   
+async def _process_exception_balance(cxt, e, here):
+  print(e, traceback.format_exc())
+  recv_msg = str(cxt.message.content)
+  msg = ans.FAILED_BALANCE(recv_msg)
+  await _send(cxt, msg, here)
+    
 ## Exchanges ##
+
+  #Maybe TO-DO
 
 ## Routing ##
 

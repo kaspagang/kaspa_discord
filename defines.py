@@ -2,6 +2,7 @@ import os
 import pprint as pp
 import datetime
 
+
 DEV_ID = os.environ['DEV_ID']
 TOKEN = os.environ['TOKEN']
 HOST_IP = os.environ['HOST_IP2']
@@ -39,20 +40,7 @@ SER_TO_ANSWER_CHAN = {
 ##for kaspa backend##
 TRY_DEDICATED_NODE = True
 
-#will lower probability when I receive donations
-#will increase probability when I invest time into it
-# -> 5k = 1 point increase
-CALL_FOR_DONATION_PROB = 1/23.3
-
-#starting changelog:
-#Increase for $address_stats calcs      -1
-#Decrease for 1.111k kaspa                  + ~0.3
-#Increase for $top_gainers              -2
-#Increase for $address_stats            -2
-#Increase for impersonation detection:  -5
-#Increase for $halving:                 -7
-#decrease for 100k kaspa:               +20
-#start:                                 +20
+CALL_FOR_DONATION_PROB = 1/20 #increase for rust rewrite
 
 
 
@@ -71,7 +59,7 @@ for chars in sim_chars:
 UNICODE_TRANSLATION_TABLE = translation
 
 class kaspa_constants:
-  TOTAL_COIN_SUPPLY = 28_376_234_058
+  TOTAL_COIN_SUPPLY = 28_376_234_058 + 327_792_543 # projection + extra gamenet kas
   DEF_PHASE_INCREMENT = 2_629_800
   DEFLATIONARY_TABLE ={
     0: {"daa_range": range(0, 15519600), "reward_per_daa": 500.0},
@@ -538,6 +526,20 @@ INFO: <@{imp_id}> with member id: `{imp_id}` has registered the display-name `{i
 
     FAILED = lambda recv_msg : f'''
   Could not process: {recv_msg}'''
+  
+    FAILED_ADDR_MINING = lambda recv_msg : f'''
+  Could not process: {recv_msg}
+  
+  Note: 1) the address most mine over a certain treshold to gather required data
+        2) addresses mining to pools can not be logged
+        3) for balance information please try: $balance <address>
+  '''
+  
+    FAILED_BALANCE= lambda recv_msg : f'''
+  Could not process: {recv_msg}
+  
+  Note: this may occur if the address balance is 0
+  '''
 
     SUCCESS = f'''SUCCESS''' # for test command
 
@@ -549,6 +551,23 @@ INFO: <@{imp_id}> with member id: `{imp_id}` has registered the display-name `{i
     ========================================
     Total supply        : {kaspa_constants.TOTAL_COIN_SUPPLY:,} KAS
     Percent mined       : {round(circulating_coins/kaspa_constants.TOTAL_COIN_SUPPLY*100, 2)}%'''
+    
+    
+    MARKET_DATA = lambda market_data : f'''
+    Value               : {float(market_data['value'])} {market_data["quote"]} per 1 Million KAS
+    
+    Current Market-Cap  : {float(market_data["circ_m-cap"])} {market_data["quote"]}
+    Diluted Market-Cap  : {float(market_data["dil_m-cap"])} {market_data["quote"]}
+    
+    Volumne             : {float(market_data["dil_m-cap"])} {market_data["quote"]}
+    
+    24-hr High          : {float(market_data["high"])} {market_data["quote"]}
+    24-hr Low           : {float(market_data["low"])} {market_data["quote"]}
+    
+    24-hr Price-Change  : {round(float(market_data["price_change"])*100, 2)} % {market_data["quote"]}'''
+    
+    VALUE = lambda market_data : f'''
+    {float(market_data['value'])} {market_data["quote"]} per 1 Million KAS'''
     
     DEVFUND = lambda mining_addr_value, donation_addr_value, percent_of_network, hashrate : f'''
   =======================================================================
@@ -589,9 +608,11 @@ INFO: <@{imp_id}> with member id: `{imp_id}` has registered the display-name `{i
     Hashrate: {norm_hashrate}''' 
     
     CONSIDER_DONATION = f'''
-    Please consider a donation:
-    Devfund: {devfund_addresses.DONATION_ADDR}
-    Rust Rewrite Effort: {devfund_addresses.REWRITE_ADDR}'''
+  Please consider a donation:
+  • Devfund: 
+    {devfund_addresses.DONATION_ADDR}
+  • Rust Rewrite Effort: 
+    {devfund_addresses.REWRITE_ADDR}'''
 
     MINING_CALC = lambda rewards : f'''
   KAS / sec   :  {rewards['secound']:,}
@@ -605,9 +626,9 @@ INFO: <@{imp_id}> with member id: `{imp_id}` has registered the display-name `{i
     DONATION_ADDRS = f'''
   Please consider a donation:
   • Devfund: 
-    {kasper_addresses.DONATION_ADDR}
+    {devfund_addresses.DONATION_ADDR}
   • Rust Rewrite Effort: 
-    {kasper_addresses.DONATION_ADDR}'''
+    {devfund_addresses.REWRITE_ADDR}'''
 
     def TOP_GAINERS(miners):
       TG_MSG = list()
