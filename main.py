@@ -303,13 +303,14 @@ async def coin_supply(cxt, *args):
 async def market_data(cxt, quote_asset = "usd", *args):
   '''Get market_data'''
   here = True if 'here' in [quote_asset, *args] else False
-  if quote_asset == None | quote_asset == "here":
+  if quote_asset == None or quote_asset == "here":
           quote_asset = 'usd'
   try:
-    circ_supply = kaspa.get_circ_supply()
+    circ_supply = helpers.sompis_to_kas(kaspa.get_circ_supply())
     market_data = cryptoinfo.kaspa_market_info(quote_asset)
     market_data.update(helpers.get_market_caps(market_data["value"], circ_supply))
-    msg = ans.MARKET_DATA(circ_supply)
+    print(market_data)
+    msg = ans.MARKET_DATA(market_data)
     await _send(cxt, msg, here)
   except (Exception, grpc.RpcError) as e:
     await _process_exception(cxt, e, here)
@@ -318,10 +319,9 @@ async def market_data(cxt, quote_asset = "usd", *args):
 async def value(cxt, quote_asset = "usd", *args):
   '''Get Kas value per 1M'''
   here = True if 'here' in [quote_asset, *args] else False
-  if quote_asset == None | quote_asset == "here":
+  if quote_asset == None or quote_asset == "here":
           quote_asset = 'usd'
   try:
-    circ_supply = kaspa.get_circ_supply()
     market_data = cryptoinfo.kaspa_market_info(quote_asset)
     msg = ans.VALUE(market_data)
     await _send(cxt, msg, here)

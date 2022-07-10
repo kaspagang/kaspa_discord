@@ -554,17 +554,17 @@ INFO: <@{imp_id}> with member id: `{imp_id}` has registered the display-name `{i
     
     
     MARKET_DATA = lambda market_data : f'''
-    Value               : {float(market_data['value'])} {market_data["quote"]} per 1 Million KAS
+    Value               : {market_data['value']:,} {market_data["quote"]}         (per 1 Million KAS)
     
-    Current Market-Cap  : {float(market_data["circ_m-cap"])} {market_data["quote"]}
-    Diluted Market-Cap  : {float(market_data["dil_m-cap"])} {market_data["quote"]}
+    Current Market-Cap  : {market_data["circ_m-cap"]:,} {market_data["quote"]}
+    Diluted Market-Cap  : {market_data["dil_m-cap"]:,} {market_data["quote"]}
     
-    Volumne             : {float(market_data["dil_m-cap"])} {market_data["quote"]}
+    Volumne             : {market_data["volume"]:,} {market_data["quote"]}
     
-    24-hr High          : {float(market_data["high"])} {market_data["quote"]}
-    24-hr Low           : {float(market_data["low"])} {market_data["quote"]}
+    24-hr High          : {market_data["high"]:,} {market_data["quote"]}         (per 1 Million KAS)
+    24-hr Low           : {market_data["low"]:,} {market_data["quote"]}         (per 1 Million KAS)
     
-    24-hr Price-Change  : {round(float(market_data["price_change"])*100, 2)} % {market_data["quote"]}'''
+    24-hr Price-Change  : {round(float(market_data["price_change"])*100, 3):,} % {market_data["quote"]}'''
     
     VALUE = lambda market_data : f'''
     {float(market_data['value'])} {market_data["quote"]} per 1 Million KAS'''
@@ -612,7 +612,9 @@ INFO: <@{imp_id}> with member id: `{imp_id}` has registered the display-name `{i
   • Devfund: 
     {devfund_addresses.DONATION_ADDR}
   • Rust Rewrite Effort: 
-    {devfund_addresses.REWRITE_ADDR}'''
+    {devfund_addresses.REWRITE_ADDR}
+  • KasperBot Development: 
+    {kasper_addresses.DONATION_ADDR}'''
 
     MINING_CALC = lambda rewards : f'''
   KAS / sec   :  {rewards['secound']:,}

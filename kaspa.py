@@ -155,7 +155,7 @@ def estimate_network_hashrate(start_block_hash, window_size, use_dedicated_node=
   cli.close()
   return int(network_hashrate)
 
-def get_circ_supply(start_block_hash, window_size, use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
+def get_circ_supply(use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
   if tries == 3:
     raise Exception
   cli = RPCClient()
@@ -167,12 +167,12 @@ def get_circ_supply(start_block_hash, window_size, use_dedicated_node=TRY_DEDICA
   except (Exception, grpc.RpcError) as e:
     print(e)
     cli.close()
-    return get_circ_supply(start_block_hash, window_size, use_dedicated_node=False, tries=tries+1)
+    return get_circ_supply(use_dedicated_node=False, tries=tries+1)
   try:
-    circ_supply = cli.request('getCoinSupplyRequest', {})['circulatingSompi']
+    circ_supply = cli.request('getCoinSupplyRequest', {})['getCoinSupplyResponse']['circulatingSompi']
   except (Exception, grpc.RpcError) as e:
     print(e)
     cli.close()
-    return get_circ_supply(start_block_hash, window_size, use_dedicated_node=False, tries=tries+1)
+    return get_circ_supply(use_dedicated_node=False, tries=tries+1)
   cli.close()
   return round(float(circ_supply))
