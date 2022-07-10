@@ -210,7 +210,7 @@ def deflationay_phases(current_daa_score, start=None, end=None):
       phases[phase] = {
       'active_phase' : False,
       'start_date' : start_date,
-      'start_supply'  :  get_coin_supply(def_phase['daa_range'].start),
+      'start_supply'  :  get_coin_supply(def_phase['daa_range'].start) - (kc.EXTRA_GAMENET_KAS if phase == 0 else 0),
       'end_date' : end_date,
       'end_supply'  :  get_coin_supply(def_phase['daa_range'].stop-1) ,
       'completion' : 100,
@@ -220,7 +220,7 @@ def deflationay_phases(current_daa_score, start=None, end=None):
       phases[phase] = {
       'active_phase' : True,
       'start_date' : start_date,
-      'start_supply'  :  get_coin_supply(def_phase['daa_range'].start),
+      'start_supply'  :  get_coin_supply(def_phase['daa_range'].start) - (kc.EXTRA_GAMENET_KAS if phase == 0 else 0),
       'end_date' : end_date,
       'end_supply'  :  get_coin_supply(def_phase['daa_range'].stop-1),
       'completion' : 0,
