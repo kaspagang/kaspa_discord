@@ -59,7 +59,8 @@ for chars in sim_chars:
 UNICODE_TRANSLATION_TABLE = translation
 
 class kaspa_constants:
-  TOTAL_COIN_SUPPLY = 28_376_234_058 + 327_792_543 # projection + extra gamenet kas
+  EXTRA_GAMENET_KAS = 327_792_543
+  TOTAL_COIN_SUPPLY = 28_376_234_058 + EXTRA_GAMENET_KAS # projection + extra gamenet kas
   DEF_PHASE_INCREMENT = 2_629_800
   DEFLATIONARY_TABLE ={
     0: {"daa_range": range(0, 15519600), "reward_per_daa": 500.0},

@@ -37,13 +37,13 @@ def get_coin_supply(target_daa_score):
   if target_daa_score >= list(kc.DEFLATIONARY_TABLE.values())[-1]['daa_range'].start:
     return kc.TOTAL_COIN_SUPPLY
   coin_supply = 0
-  for def_phase in kc.DEFLATIONARY_TABLE.values():
+  for i, def_phase in enumerate(kc.DEFLATIONARY_TABLE.values()):
     if target_daa_score in def_phase['daa_range']:
       coin_supply += def_phase['reward_per_daa']*(target_daa_score - def_phase['daa_range'].start)
       break
     else:
       coin_supply += def_phase['reward_per_daa']*(def_phase['daa_range'].stop - def_phase['daa_range'].start-1)
-  return round(coin_supply)
+  return round(coin_supply) + kc.EXTRA_GAMENET_KAS,
 
 def rewards_in_range(daa_start, daa_end):
   if daa_start >= list(kc.DEFLATIONARY_TABLE.values())[-1]['daa_range'].start:
@@ -200,7 +200,7 @@ def deflationay_phases(current_daa_score, start=None, end=None):
       phases[phase] = {
       'active_phase' : True,
       'start_date' : start_date,
-      'start_supply'  :  get_coin_supply(def_phase['daa_range'].start),
+      'start_supply'  :  get_coin_supply(def_phase['daa_range'].start) - kc.EXTRA_GAMENET_KAS if phase == 0 else 0,
       'end_date' : end_date,
       'end_supply'  :  get_coin_supply(def_phase['daa_range'].stop-1),
       'completion' : round(((current_daa_score - def_phase['daa_range'].start) / (def_phase['daa_range'].stop - 1 - def_phase['daa_range'].start)*100), 2),
@@ -212,7 +212,7 @@ def deflationay_phases(current_daa_score, start=None, end=None):
       'start_date' : start_date,
       'start_supply'  :  get_coin_supply(def_phase['daa_range'].start),
       'end_date' : end_date,
-      'end_supply'  :  get_coin_supply(def_phase['daa_range'].stop-1),
+      'end_supply'  :  get_coin_supply(def_phase['daa_range'].stop-1) ,
       'completion' : 100,
       'rewards' : def_phase['reward_per_daa'],
       }
