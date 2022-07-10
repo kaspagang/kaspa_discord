@@ -16,7 +16,7 @@ def kaspa_market_info(quote_asset: str = "usd"): #from coingeko
         market_info['high'] = resp["market_data"]["high_24h"][quote_asset] * 1_000_000
         market_info['low'] = resp["market_data"]["low_24h"][quote_asset] * 1_000_000
         market_info['volume'] = resp["market_data"]["total_volume"][quote_asset] 
-        market_info['price_change'] =  resp["market_data"]["price_change_24h_in_currency"][quote_asset] * 1000
+        market_info['price_change'] =  resp["market_data"]["price_change_percentage_24h_in_currency"][quote_asset]
        
         print(market_info)
          
