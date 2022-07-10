@@ -43,7 +43,7 @@ def get_coin_supply(target_daa_score):
       break
     else:
       coin_supply += def_phase['reward_per_daa']*(def_phase['daa_range'].stop - def_phase['daa_range'].start-1)
-  return round(coin_supply) + kc.EXTRA_GAMENET_KAS,
+  return round(coin_supply) + kc.EXTRA_GAMENET_KAS
 
 def rewards_in_range(daa_start, daa_end):
   if daa_start >= list(kc.DEFLATIONARY_TABLE.values())[-1]['daa_range'].start:
