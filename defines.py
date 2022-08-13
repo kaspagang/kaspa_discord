@@ -581,12 +581,9 @@ class answers:
     
     CONSIDER_DONATION = f'''
   Please consider a donation:
-  • Devfund: 
-    {devfund_addresses.DONATION_ADDR}
-  • Rust Rewrite Effort: 
-    {devfund_addresses.REWRITE_ADDR}
-  • KasperBot Development: 
-    {kasper_addresses.DONATION_ADDR}'''
+  • kasperbot Development: 
+    {kasper_addresses.DONATION_ADDR}
+    '''
 
     MINING_CALC = lambda rewards : f'''
   KAS / sec   :  {rewards['secound']:,}
@@ -599,10 +596,9 @@ class answers:
 
     DONATION_ADDRS = f'''
   Please consider a donation:
-  • Devfund: 
-    {devfund_addresses.DONATION_ADDR}
-  • Rust Rewrite Effort: 
-    {devfund_addresses.REWRITE_ADDR}'''
+  • kasperbot Development: 
+    {kasper_addresses.DONATION_ADDR}
+    '''
 
     def TOP_GAINERS(miners):
       TG_MSG = list()

@@ -3,14 +3,13 @@ import asyncio
 from discord.ext import commands
 import random
 
-from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB, INTERVAL, TRADE_OFFER_CHANS, DONATORS, TRADE_DIS_INTERVALS, SER_TO_TRADE_CHANS, UNICODE_TRANSLATION_TABLE)
+from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB, DONATORS)
 import helpers
 import kaspa
 from requests import get
 import grpc
 import traceback
 import cryptoinfo
-from Levenshtein import distance as levenshtein_distance
 
 intents = discord.Intents.default().all()
 bot = commands.Bot(command_prefix='$', intents=intents)
