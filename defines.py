@@ -16,21 +16,12 @@ DONATORS = [
   #DEV_ID #for testing
 ]
 
-## intervals ##
-INTERVAL = 60*60
-TRADE_DIS_INTERVALS = 1
 
 ##channel / server routing##
 ALLOWED_SERVERS = [599153230659846165, 932389256838643755] #kaspa, test
 
 ##channels##
-TRADE_OFFER_CHANS = [910316340735262720, 934846748491415573] #kaspa, test
 DEDICATED_CHANS   = [934815196361404467, 934753516575158282] #kaspa, test
-
-SER_TO_TRADE_CHANS = {
-  599153230659846165 : TRADE_OFFER_CHANS[0], #kaspa
-  932389256838643755 : TRADE_OFFER_CHANS[1] #test
-}
 
 SER_TO_ANSWER_CHAN = {
   599153230659846165 : DEDICATED_CHANS[0], #kaspa
@@ -45,18 +36,8 @@ CALL_FOR_DONATION_PROB = 1/20 #increase for rust rewrite
 
 
 ##channels##
-TRADE_OFFER_CHAN = 910316340735262720
 DEVFUND_CHAN = 922204606946234398
 
-with open('unicode_sim.txt', 'r') as fp:
-  sim_chars = fp.readlines()[8:]
-
-translation = dict()
-for chars in sim_chars:
-  for char in chars[1:]:
-     translation.update({ord(char) : chars[0]})
-
-UNICODE_TRANSLATION_TABLE = translation
 
 class kaspa_constants:
   EXTRA_GAMENET_KAS = 327_792_543
@@ -514,16 +495,6 @@ class answers:
 
     def TICKER(ticker):
         pass
-
-    DISCLAIMER = '''Disclaimer:
-  
-  This is a kind reminder that #trade channel is not moderated by the server mods, core devs, treasurers or any other constituents of the Kaspa community. This channel was created to accommodate traders which bogged down the community channel, having created it does not impose any responsibility for the actions of any buyer, seller, escrow service etc. on any particular community member. Please be mindful of that and careful with your money.
-  
-  '''
-
-    SIMILAR_MEMBER = lambda imp_id, imp_name, target_id, target_name, lev_per : f'''
-INFO: <@{imp_id}> with member id: `{imp_id}` has registered the display-name `{imp_name}`, which is similar to the pre-existing display-name of `{target_name}`, from user <@{target_id}> with member id: `{target_id}` (similarity score: {round(lev_per*100)} %).
-'''
 
     FAILED = lambda recv_msg : f'''
   Could not process: {recv_msg}'''
