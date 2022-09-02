@@ -487,6 +487,7 @@ class rustfund_addresses:
     RUST_ADDR1 = 'kaspa:pz9zzekr2ge5x9jevzqe6tna58wmqjvklf6f6kztfpzut97awgc924ep4juee' # Balance: 58,508,461.32000000
     RUST_ADDR2 = 'kaspa:prwh2umnj7naewqkqq7qw87smyf4x0ehtk7m3j7x33hh67agw76z6zkwvtz2s' # Balance: 21,503,634.60000000
     RUST_ADDR3 = 'kaspa:przn2keqczhwc2c3g5sycknw9lp84cjgksxmfk6z8kcg83lnpczxsmg6evzuv' # Balance: 20,000,384.00000000
+    RUST_ADDR4 = 'kaspa:pp7j35lwag7ejl7zqxljetsxu4yvuwjmek2v33pwpyg6tgzhkecau9fl8s9qu' # Balance: 282.99990000 
 
 class answers:
         
