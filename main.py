@@ -361,6 +361,141 @@ async def _send(cxt, msg, here, blockify=True, dm_dev=False, dm_user=False):
 
 ## Auto Moderator ##
 
+### RE matching code ###
+# This could prbly be replaced with a very good RE
+import re 
+REGEX_FLAGS = re.IGNORECASE 
+BLACKLIST_HINTS = ['admin', \ 
+                    'administrator',\
+                    'mod',\
+                    'moderator',\
+                    'support',\
+                    'help',\
+                    'helper',\
+                    'assistance',\
+                    'official']
+BLACKLIST_PREFS = ['+[^a-zA-Z]', \ 
+                    '\A']
+BLACKLIST_SUFFS = ['[^a-zA-Z]+',\
+                    '$']
+
+def thorough_match(s,h):
+    for pre in BLACKLIST_PREFS:
+        for su in BLACKLIST_SUFF:
+            #p = re.compile(pre + h + su, REGEX_FLAGS)
+            p = re.compile(f"{pre}{h}{su}", REGEX_FLAGS)
+            if None != p.search(s):
+                return True
+    return False
+
+def filter_by_regex(member):
+    for s in [member.name, member.nick, member.display_name, member.raw_status]:
+        for blh in BLACKLIST_HINTS:
+            if -1 != s.find(blh):
+                if thorough_match(s, blh):
+                    return True
+    return False
+
+### End of RE matching code ###
+
+### Captcha code ###
+import captcha.image
+import hashlib
+import os
+
+def rnd_for_captcha():
+    # seeds defaultly with system time
+    # can try to think of better ones (kaspa current price related??!)
+    random.seed()
+    r = random.randint(0,2<<22)
+    return r
+
+# This example code is taken from the code in 
+# the captchasDotNet github python project
+# secret is constant "secret" for demo, and we
+# use 6 letters and so
+def generate_captcha_with_captchas_net(id)
+    r = str(rnd_for_captcha())
+    urlc = f"https://image.captchas.net/?client=demo&random={r}"
+    png_data = get(urlc)
+    f = open(f'tmp_captcha-{r}.png','wb')
+    f.write(png_data)
+    f.close()
+    s = f'secret{r}'
+    m = hashlib.md5()
+    m.update(bytes(s,'charmap'))
+    dig = m.digest()
+    alph = 'abcdefghkmnopqrstuvwxyz'
+    ps = ''
+    for i in range(0,6):
+        ps += alph[dig[i]%len(alph)]
+    return f'tmp_captcha-{id}.png',ps
+
+def generate_simple_captcha(id)
+    # Uses default fonts files that we can override 
+    # if we want
+    image = captcha.image.ImageCaptcha()
+    r = str(rnd_for_captcha())
+    # This is not thread safe, could result in false negative
+    # if two userwe can use a lock here if
+    # we are really scared that there would
+    image.write(r, f'tmp_captcha-{r}.png')
+    return f'tmp_captcha-{id}.png',r
+
+
+#
+#   - Generates captcha png file (currently using the 
+#       simple captcha, note we can use the captchas.net one
+#       instead) and a solution for it.
+#   - Sends the file and a message to user, asking to enter the text in the 
+#       file.
+#   - validates the user's response.
+#   - returns True if the user responded correctly
+#
+def validate_captcha(member):
+    theid = member.id
+    pth, ps = generate_simple_captcha(str(theid))
+    #dmc = member.create_dm()
+    dmc = await bot.fetch_user(theid)
+    # can try and catch here but better for now to
+    # except on it.
+    f = open(pth,'rb')
+    df = discord.File(f, filename='captcha.png')
+    await dmc.send("Hello there!\n\
+            In order to enter the server, please prove you are not a bot, by responding \
+            to this message with the text appearing in the following image:", file=df)
+    resp = [m async for m in dmc.history(limit=1)][0]
+    
+    f.close()
+    
+    # First check everything works, then delete the local file.
+    # Note this should all be moved to a dedicated resource directory
+    
+    #os.remove(pth)
+
+    if resp == ps:
+        return True
+    return False
+
+### End Captcha code ###
+
+'''
+Note banning according to discord doc at discord.fandom.com/Wiki/Ban 
+also bans the ip address and phone number from joining the server 
+again. This will give us a problem as discussed about ip based 
+banning (as then vpns will be banned and we do not necessarily 
+want that).
+'''
+def should_ban_based_on_rules(member):
+    if True == member.bot:
+        return True
+    if True == filter_by_regex(member):
+        return True
+    return False
+
+def validate_captcha_member(member):
+    return validate_captcha(member)
+
 @bot.event
 async def on_member_join(member):
     mem_guild = member.guild
