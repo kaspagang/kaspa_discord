@@ -365,9 +365,11 @@ async def on_member_join(member):
     mem_guild = member.guild
     if "Server von jwj" == mem_guild.name:
       dev_chan = await bot.fetch_user(int(DEV_ID))
-      send_msg = await dev_chan.send(f"member %s joined server von jwj {member.name}")
+      send_msg = await dev_chan.send(f"member "{member.name}" joined server von jwj")
       if "alonko" == member.name: 
-          await mem_guild.ban(member)
+          await member.ban(reason="auto-ban")
+      if "СарtchаBоt" == member.name:
+          await member.ban(reason="auto-ban")
     
 
 bot.run(TOKEN)
