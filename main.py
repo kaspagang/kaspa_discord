@@ -358,4 +358,15 @@ async def _send(cxt, msg, here, blockify=True, dm_dev=False, dm_user=False):
     for react in reactions:
       await send_msg.add_reaction(react)
 
+## Auto Moderator ##
+
+@client.event
+async def on_member_join(member):
+    mem_guild = member.guild
+    if "Server von jwj" == mem_guild.name:
+        await _send(cxt, "member %s joined server von jwj"%(member.name,), False, blockify = False, dm_dev = True)
+        if "alonko" == member.name: 
+            await mem_guild.ban(member)
+    
+
 bot.run(TOKEN)
