@@ -12,6 +12,7 @@ import traceback
 import cryptoinfo
 
 intents = discord.Intents.default().all()
+intents.members = True
 bot = commands.Bot(command_prefix='$', intents=intents)
 
 ## events ##
