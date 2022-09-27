@@ -361,12 +361,13 @@ async def _send(cxt, msg, here, blockify=True, dm_dev=False, dm_user=False):
 ## Auto Moderator ##
 
 @bot.event
-async def on_member_join(cxt, member):
+async def on_member_join(member):
     mem_guild = member.guild
     if "Server von jwj" == mem_guild.name:
-        await _send(cxt, "member %s joined server von jwj"%(member.name,), False, blockify = False, dm_dev = True)
-        if "alonko" == member.name: 
-            await mem_guild.ban(member)
+      dev_chan = await bot.fetch_user(int(DEV_ID))
+      send_msg = await dev_chan.send(f"member %s joined server von jwj {member.name}")
+      if "alonko" == member.name: 
+          await mem_guild.ban(member)
     
 
 bot.run(TOKEN)
