@@ -61,7 +61,7 @@ async def rustfund(cxt, *args):
       *rust_addresses
       )
     
-    msg = ans.RUST_FUND(list(*zip(rust_addresses, balances)))
+    msg = ans.RUST_FUND(list(zip(rust_addresses, balances)))
     await _send(cxt, msg, here)
   except Exception as e:
     await _process_exception(cxt, e, here)
