@@ -569,9 +569,9 @@ class answers:
   
     RUST_FUND = lambda address_balance_pairs: f'''
   =======================================================================
-  addresses:
+  Rust-fund Addresses:
 
-    {''.join([f"• Address: {address_balance_pair[0]}  {chr(92)}n      Amount: {address_balance_pair[1],} KAS  {chr(92)}n{chr(92)}n" for address_balance_pair in address_balance_pairs])}
+    {''.join([f"• Address: {address_balance_pair[0]} {os.linesep}     Amount: {address_balance_pair[1][0],} KAS  {os.linesep + os.linesep}" for address_balance_pair in address_balance_pairs])}
         
   =======================================================================
   TOTAL:    {sum(address_balance_pair[0] for address_balance_pair in address_balance_pairs):,} KAS'''
