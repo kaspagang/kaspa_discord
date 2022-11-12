@@ -37,26 +37,15 @@ async def balance(cxt, address, *args):
     await _process_exception_balance(cxt, e, here)
 
 @bot.command()
-async def devfund(cxt, window_size=None, *args):
+async def devfund(cxt, *args):
   '''Display devfund balance'''
-  here = True if 'here' in [window_size,] + list(args) else False
-  if window_size == None or window_size == 'here':
-    window_size = 86400 #daa_window
-  else:
-    window_size = int(window_size)
+  here = True if 'here' in + list(args) else False
   try:
     balances = kaspa.get_balances(
       dev_addrs.MINING_ADDR,
       dev_addrs.DONATION_ADDR,
       )
-    utxos = kaspa.get_utxo_entries([dev_addrs.MINING_ADDR,])
-    stats = kaspa.get_stats()
-    network_hashrate = int(stats['hashrate'])
-    cut_off = int(stats['daa_score']) - window_size
-    addr_percent = helpers.mining_stats([dev_addrs.MINING_ADDR,], utxos, cut_off, int(stats['daa_score']))[dev_addrs.MINING_ADDR]['network_percent']
-    addr_hashrate = helpers.hashrate_from_percent_of_network(addr_percent, network_hashrate)
-    addr_hashrate = helpers.normalize_hashrate(addr_hashrate)
-    msg = ans.DEVFUND(*balances, addr_percent, addr_hashrate)
+    msg = ans.DEVFUND(*balances)
     await _send(cxt, msg, here)
   except Exception as e:
     await _process_exception(cxt, e, here)

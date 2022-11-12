@@ -548,7 +548,7 @@ class answers:
     VALUE = lambda market_data : f'''
     {float(market_data['value'])} {market_data["quote"]} per 1 Million KAS'''
     
-    DEVFUND = lambda mining_addr_value, donation_addr_value, percent_of_network, hashrate : f'''
+    DEVFUND = lambda mining_addr_value, donation_addr_value: f'''
   =======================================================================
   Donation addresses:
 
@@ -560,9 +560,6 @@ class answers:
   Mining addresses:
 
     • {devfund_addresses.MINING_ADDR}
-
-        Network Share       : {round(percent_of_network*100, 4)} % (Approx.)
-        Effective Hashrate  : {hashrate} (Approx.)
     
   -----------------------------------------------------------------------
     Amount: {int(mining_addr_value):,} KAS
