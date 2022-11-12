@@ -574,7 +574,7 @@ class answers:
 {''.join([f"• Address: {address_balance_pair[0]} {os.linesep}     Amount: {int(address_balance_pair[1]):,} KAS  {os.linesep + os.linesep}" for address_balance_pair in address_balance_pairs])}
         
   =======================================================================
-  TOTAL:    {int(sum(address_balance_pair[1] for address_balance_pair in address_balance_pairs)):,} KAS'''
+  TOTAL:    {sum([int(address_balance_pair[1]) for address_balance_pair in address_balance_pairs]):,} KAS'''
 
     BALANCE = lambda balance : f'''
     {balance:,} KAS'''
