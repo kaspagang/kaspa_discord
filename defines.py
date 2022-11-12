@@ -571,10 +571,10 @@ class answers:
   =======================================================================
   Rust-fund Addresses:
 
-    {''.join([f"• Address: {address_balance_pair[0]} {os.linesep}     Amount: {address_balance_pair[1][0],} KAS  {os.linesep + os.linesep}" for address_balance_pair in address_balance_pairs])}
+    {''.join([f"• Address: {address_balance_pair[0]} {os.linesep}     Amount: {int(address_balance_pair[1][0]):,} KAS  {os.linesep + os.linesep}" for address_balance_pair in address_balance_pairs])}
         
   =======================================================================
-  TOTAL:    {sum(address_balance_pair[0] for address_balance_pair in address_balance_pairs):,} KAS'''
+  TOTAL:    {int(sum(address_balance_pair[1][0] for address_balance_pair in address_balance_pairs)):,} KAS'''
 
     BALANCE = lambda balance : f'''
     {balance:,} KAS'''
