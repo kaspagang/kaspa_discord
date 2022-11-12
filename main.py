@@ -39,7 +39,7 @@ async def balance(cxt, address, *args):
 @bot.command()
 async def devfund(cxt, *args):
   '''Display devfund balance'''
-  here = True if 'here' in + list(args) else False
+  here = True if 'here' in list(args) else False
   try:
     balances = kaspa.get_balances(
       dev_addrs.MINING_ADDR,
