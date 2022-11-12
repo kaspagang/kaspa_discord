@@ -585,7 +585,9 @@ class answers:
     
     CONSIDER_DONATION = f'''
   Please consider a donation:
-  • kasperbot Development: 
+  • Devfund:
+    {devfund_addresses.DONATION_ADDR}
+  • KasperBot Development: 
     {kasper_addresses.DONATION_ADDR}
     '''
 
@@ -600,7 +602,9 @@ class answers:
 
     DONATION_ADDRS = f'''
   Please consider a donation:
-  • kasperbot Development: 
+  • Devfund:
+    {devfund_addresses.DONATION_ADDR}
+  • KasperBot Development: 
     {kasper_addresses.DONATION_ADDR}
     '''
 
