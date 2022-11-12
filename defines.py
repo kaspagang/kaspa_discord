@@ -571,7 +571,7 @@ class answers:
   =======================================================================
   addresses:
 
-    {''.join([f"• Address: {address_balance_pair[0]} \n      Amount: {address_balance_pair[1],} KAS \n" for address_balance_pair in address_balance_pairs])}
+    {''.join([f"• Address: {address_balance_pair[0]}  {chr(92)}n      Amount: {address_balance_pair[1],} KAS  {chr(92)}n{chr(92)}n" for address_balance_pair in address_balance_pairs])}
         
   =======================================================================
   TOTAL:    {sum(address_balance_pair[0] for address_balance_pair in address_balance_pairs):,} KAS'''
