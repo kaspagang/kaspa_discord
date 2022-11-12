@@ -57,7 +57,7 @@ async def rustfund(cxt, *args):
   try:
     rust_addresses = list(vars(rus_addrs).values())
     balances = kaspa.get_balances(
-      rust_addresses
+      *rust_addresses
       )
     
     msg = ans.RUST_FUND(zip(rust_addresses, balances))
