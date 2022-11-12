@@ -49,20 +49,6 @@ async def devfund(cxt, *args):
     await _send(cxt, msg, here)
   except Exception as e:
     await _process_exception(cxt, e, here)
-    
-@bot.command()
-async def devfund(cxt, *args):
-  '''Display devfund balance'''
-  here = True if 'here' in list(args) else False
-  try:
-    balances = kaspa.get_balances(
-      dev_addrs.MINING_ADDR,
-      dev_addrs.DONATION_ADDR,
-      )
-    msg = ans.DEVFUND(*balances)
-    await _send(cxt, msg, here)
-  except Exception as e:
-    await _process_exception(cxt, e, here)
 
 @bot.command()
 async def rustfund(cxt, *args):
