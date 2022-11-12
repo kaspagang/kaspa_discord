@@ -3,7 +3,7 @@ import asyncio
 from discord.ext import commands
 import random
 
-from defines import (answers as ans, devfund_addresses as dev_addrs, DEV_ID, TOKEN, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB, DONATORS)
+from defines import (answers as ans, devfund_addresses as dev_addrs, rustfund_addresses as rus_addrs,  DEV_ID, TOKEN, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB, DONATORS)
 import helpers
 import kaspa
 from requests import get
@@ -49,6 +49,36 @@ async def devfund(cxt, *args):
     await _send(cxt, msg, here)
   except Exception as e:
     await _process_exception(cxt, e, here)
+    
+@bot.command()
+async def devfund(cxt, *args):
+  '''Display devfund balance'''
+  here = True if 'here' in list(args) else False
+  try:
+    balances = kaspa.get_balances(
+      dev_addrs.MINING_ADDR,
+      dev_addrs.DONATION_ADDR,
+      )
+    msg = ans.DEVFUND(*balances)
+    await _send(cxt, msg, here)
+  except Exception as e:
+    await _process_exception(cxt, e, here)
+
+@bot.command()
+async def rustfund(cxt, *args):
+  '''Display rustfund balance'''
+  here = True if 'here' in list(args) else False
+  try:
+    rust_addresses = vars(rus_addrs)
+    balances = kaspa.get_balances(
+      rust_addresses
+      )
+    
+    msg = ans.RUST_FUND(zip(rust_addresses, balances))
+    await _send(cxt, msg, here)
+  except Exception as e:
+    await _process_exception(cxt, e, here)
+
 
 @bot.command()
 async def address_mining(cxt, address, window_size = 7200, *args):

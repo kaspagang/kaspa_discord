@@ -565,6 +565,16 @@ class answers:
     Amount: {int(mining_addr_value):,} KAS
   =======================================================================
   TOTAL:    {int(mining_addr_value + donation_addr_value):,} KAS'''
+  
+  
+    RUST_FUND = lambda address_balance_pairs: f'''
+  =======================================================================
+  addresses:
+
+    {''.join([f"• Address: {address_balance_pair[0]} \n      Amount: {address_balance_pair[1],} KAS \n" for address_balance_pair in address_balance_pairs])}
+        
+  =======================================================================
+  TOTAL:    {sum(address_balance_pair[0] for address_balance_pair in address_balance_pairs):,} KAS'''
 
     BALANCE = lambda balance : f'''
     {balance:,} KAS'''
