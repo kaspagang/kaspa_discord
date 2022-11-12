@@ -55,7 +55,8 @@ async def rustfund(cxt, *args):
   '''Display rustfund balance'''
   here = True if 'here' in list(args) else False
   try:
-    rust_addresses = list(vars(rus_addrs).values())
+    rust_addresses = list(vars(rus_addrs).keys())
+    print(rust_addresses)
     balances = kaspa.get_balances(
       *rust_addresses
       )
