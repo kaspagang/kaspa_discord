@@ -12,7 +12,7 @@ DONATOR1 = os.environ['DONATOR1']
 
 ##Known donators - for easteregg!##
 DONATORS = [
-  DONATOR1,
+  #DONATOR1,
   #DEV_ID #for testing
 ]
 
