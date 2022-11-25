@@ -2,15 +2,21 @@ from defines import kaspa_constants as kc
 import re
 import time
 from datetime import datetime
+import random
+
+def random_colour():
+        return random.choice(["yaml", "http", "arm"], )
 
 def adjoin_messages(user_id, blockify = True, *msgs):
   sep="  ==============================================================================="
   nl = f'\n{sep}'
   if blockify:
     if user_id is None:
-      return f"```{nl.join(msgs)}```"
+      return f"""```{random_colour()}
+{nl.join(msgs)}```"""
     else:
-      return f"<@{user_id}>```{nl.join(msgs)}```"
+      return f""""<@{user_id}>```{random_colour()}
+{nl.join(msgs)}```"""
   elif not blockify:
     if user_id is None:
       return f"{nl.join(msgs)}"

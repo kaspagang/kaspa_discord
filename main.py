@@ -365,18 +365,4 @@ async def _send(cxt, msg, here, blockify=True, dm_dev=False, dm_user=False):
     for react in reactions:
       await send_msg.add_reaction(react)
 
-## Auto Moderator ##
-
-@bot.event
-async def on_member_join(member):
-    mem_guild = member.guild
-    if "Server von jwj" == mem_guild.name:
-      dev_chan = await bot.fetch_user(int(DEV_ID))
-      send_msg = await dev_chan.send(f"member '{member.name}' joined server von jwj")
-      if "alonko" == member.name: 
-          await member.ban(reason="auto-ban")
-      if "СарtchаBоt" == member.name:
-          await member.ban(reason="auto-ban")
-    
-
 bot.run(TOKEN)
