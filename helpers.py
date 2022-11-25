@@ -4,18 +4,15 @@ import time
 from datetime import datetime
 import random
 
-def random_colour():
-        return random.choice(["yaml", "http", "arm"], )
-
 def adjoin_messages(user_id, blockify = True, *msgs):
   sep="  ==============================================================================="
   nl = f'\n{sep}'
   if blockify:
     if user_id is None:
-      return f"""```{random_colour()}
+      return f"""```yaml
 {nl.join(msgs)}```"""
     else:
-      return f""""<@{user_id}>```{random_colour()}
+      return f""""<@{user_id}>```yaml
 {nl.join(msgs)}```"""
   elif not blockify:
     if user_id is None:
