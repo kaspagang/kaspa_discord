@@ -29,6 +29,22 @@ SER_TO_ANSWER_CHAN = {
   513585794506555396 : DEDICATED_CHANS[2], #custom 
 }
 
+
+STAT_CHANS = {
+        "value" : [None, 1046341865424818236, None], #kaspa, test, custom
+        "hashrate" : [None, 1046342690759004170, None], #kaspa, test, custom
+        "supply" : [None, 1046343336639856640, None], #kaspa, test, custom
+        "twitter" : [None, 1046343033559466084, None], #kaspa, test, custom
+        "discord" : [None, 1046342883621482547, None], #kaspa, test, custom
+        "telegram" : [None, 1046343989697191986, None], #kaspa, test, custom
+}
+
+SER_TO_ANSWER_CHAN = {
+  599153230659846165 : DEDICATED_CHANS[0], #kaspa
+  932389256838643755 : DEDICATED_CHANS[1], #test 
+  513585794506555396 : DEDICATED_CHANS[2], #custom 
+}
+
 ##for kaspa backend##
 TRY_DEDICATED_NODE = True
 

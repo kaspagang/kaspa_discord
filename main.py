@@ -1,25 +1,130 @@
 import discord
 import asyncio
-from discord.ext import commands
+from discord.ext import commands, tasks
 import random
 
-from defines import (answers as ans, devfund_addresses as dev_addrs, rustfund_addresses as rus_addrs,  DEV_ID, TOKEN, SER_TO_ANSWER_CHAN, CALL_FOR_DONATION_PROB, DONATORS)
+from defines import (answers as ans, devfund_addresses as dev_addrs, rustfund_addresses as rus_addrs)
+from defines import *
+
+import bs4
 import helpers
 import kaspa
 from requests import get
 import grpc
 import traceback
 import cryptoinfo
+import time
 
-intents = discord.Intents.default().all()
-intents.members = True
+intents = discord.Intents.all()
+
 bot = commands.Bot(command_prefix='$', intents=intents)
+
 
 ## events ##
 
 @bot.event
 async def on_ready():
-  print(f'running {bot.user}...') 
+  print(f'running {bot.user}...')
+  my_background_task.start()
+
+@tasks.loop(seconds= 1, count=1)
+async def my_background_task():
+        await bot.wait_until_ready()
+        print("background")
+        print(not bot.is_closed)
+        last_updates = dict()
+        for _, ids in STAT_CHANS.items():
+                for id in ids:
+                        last_updates[id] = 0
+        while True:
+                for stat_type, chan_ids in STAT_CHANS.items():
+                        print(stat_type)
+                        all_valid_ids = [chan_id for chan_id in chan_ids if isinstance(chan_id, int)]
+                        print(all_valid_ids)
+                        await asyncio.sleep(10)
+                        if bool(all_valid_ids):
+                                if stat_type == "value":
+                                        try:
+                                                value = round(int(cryptoinfo.kaspa_market_info()["value"]) / 1_000_000, 7)
+                                        except:
+                                                value = "Error"
+                                        
+                                        for chan_id in all_valid_ids:
+                                                if time.time() < last_updates[chan_id] + 60 * 5: continue
+                                                print(chan_id)
+                                                channel = bot.get_channel(chan_id)
+                                                if channel.name.split()[1] == str(value): continue
+                                                await channel.edit(name=f"value: {value}")
+                                                last_updates[chan_id] = time.time()
+
+                                elif stat_type == "hashrate":
+                                        try:
+                                                stats = kaspa.get_stats()
+                                                norm_hashrate = helpers.normalize_hashrate(int(stats['hashrate']))
+                                        except:
+                                                norm_hashrate = "Error"
+                                        for chan_id in all_valid_ids:
+                                                if time.time() < last_updates[chan_id] + 60 * 5: continue
+                                                channel = bot.get_channel(chan_id)
+                                                if channel.name.split()[1] == str(norm_hashrate): continue
+                                                await channel.edit(name=f"hashrate: {norm_hashrate}")
+                                                last_updates[chan_id] = time.time()
+                                
+                                elif stat_type == "supply":
+                                        try:
+                                                circ_supply = helpers.sompis_to_kas(kaspa.get_circ_supply())
+                                        except:
+                                                circ_supply = "Error"
+                                        for chan_id in all_valid_ids:
+                                                if time.time() < last_updates[chan_id] + 60 * 5: continue
+                                                channel = bot.get_channel(chan_id)
+                                                if channel.name.split()[1] == str(circ_supply): continue
+                                                await channel.edit(name=f"supply: {int(circ_supply):,}")
+                                                last_updates[chan_id] = time.time()
+                                
+                                elif stat_type == "twitter":
+                                        try:
+                                                followers = get("https://cdn.syndication.twimg.com/widgets/followbutton/info.json?screen_names=kaspaCurrency").json()[0]["followers_count"]
+                                        except Exception as e:
+                                                print(e)
+                                                followers = "Error"
+                                        for chan_id in all_valid_ids:
+                                                if time.time() < last_updates[chan_id] + 60 * 5: continue
+                                                print(followers)
+                                                channel = bot.get_channel(chan_id)
+                                                if channel.name.split()[1] == str(followers): continue
+                                                await channel.edit(name=f"twitter: {followers}")
+                                                last_updates[chan_id] = time.time()
+                                
+                                elif stat_type == "discord":
+                                        try:
+                                                guild = await bot.fetch_guild(ALLOWED_SERVERS[0], with_counts=True)
+                                        except:
+                                                guild = "Error"
+                                        for chan_id in all_valid_ids:
+                                                if time.time() < last_updates[chan_id] + 60 * 5: continue
+                                                print(guild.approximate_member_count)
+                                                channel = bot.get_channel(chan_id)
+                                                if channel.name.split()[1] == str(guild.approximate_member_count): continue
+                                                await channel.edit(name=f"discord: {guild.approximate_member_count}")
+                                                last_updates[chan_id] = time.time()
+                                
+                                elif stat_type == "telegram":
+                                        try:
+                                                result = get("https://t.me/kaspaenglish")
+                                                soup = bs4.BeautifulSoup(result.text,"lxml")
+                                                raw_members: str = soup.find_all("div", {'class':'tgme_page_extra'})[0].get_text()
+                                                members = int(raw_members.replace(' ', '').split("m")[0])
+                                        except Exception as e:
+                                                print(e)
+                                                members = "Error"
+                                        for chan_id in all_valid_ids:
+                                                if time.time() < last_updates[chan_id] + 60 * 5:  continue
+                                                print(members)
+                                                channel = bot.get_channel(chan_id)
+                                                if channel.name.split()[1] == str(members): continue
+                                                await channel.edit(name=f"telegram: {members}")
+                                                last_updates[chan_id] = time.time()
 
 ## commands ###
         
