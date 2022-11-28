@@ -31,12 +31,12 @@ SER_TO_ANSWER_CHAN = {
 
 
 STAT_CHANS = {
-        "value" : [None, 1046341865424818236, None], #kaspa, test, custom
-        "hashrate" : [None, 1046342690759004170, None], #kaspa, test, custom
-        "supply" : [None, 1046343336639856640, None], #kaspa, test, custom
-        "twitter" : [None, 1046343033559466084, None], #kaspa, test, custom
-        "discord" : [None, 1046342883621482547, None], #kaspa, test, custom
-        "telegram" : [None, 1046343989697191986, None], #kaspa, test, custom
+        "value" : [1046804251948617810, 1046341865424818236, None], #kaspa, test, custom
+        "hashrate" : [1046804284504809542, 1046342690759004170, None], #kaspa, test, custom
+        "supply" : [1046804311864258652, 1046343336639856640, None], #kaspa, test, custom
+        "twitter" : [1046804335947952158, 1046343033559466084, None], #kaspa, test, custom
+        "discord" : [1046804371331088384, 1046342883621482547, None], #kaspa, test, custom
+        "telegram" : [1046804400481513555, 1046343989697191986, None], #kaspa, test, custom
 }
 
 SER_TO_ANSWER_CHAN = {
