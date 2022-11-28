@@ -30,17 +30,13 @@ async def on_ready():
 @tasks.loop(seconds= 1, count=1)
 async def my_background_task():
         await bot.wait_until_ready()
-        print("background")
-        print(not bot.is_closed)
         last_updates = dict()
         for _, ids in STAT_CHANS.items():
                 for id in ids:
                         last_updates[id] = 0
         while True:
                 for stat_type, chan_ids in STAT_CHANS.items():
-                        print(stat_type)
                         all_valid_ids = [chan_id for chan_id in chan_ids if isinstance(chan_id, int)]
-                        print(all_valid_ids)
                         await asyncio.sleep(10)
                         if bool(all_valid_ids):
                                 if stat_type == "value":
@@ -51,9 +47,9 @@ async def my_background_task():
                                         
                                         for chan_id in all_valid_ids:
                                                 if time.time() < last_updates[chan_id] + 60 * 5: continue
-                                                print(chan_id)
                                                 channel = bot.get_channel(chan_id)
-                                                if channel.name.split()[1] == str(value): continue
+                                                #if channel.name.split()[1] == str(value): continue
+                                                print("updating: ", chan_id, " ", value)
                                                 await channel.edit(name=f"value: {value}")
                                                 last_updates[chan_id] = time.time()
 
@@ -66,7 +62,8 @@ async def my_background_task():
                                         for chan_id in all_valid_ids:
                                                 if time.time() < last_updates[chan_id] + 60 * 5: continue
                                                 channel = bot.get_channel(chan_id)
-                                                if channel.name.split()[1] == str(norm_hashrate): continue
+                                                #if channel.name.split()[1] == str(norm_hashrate): continue
+                                                print("updating: ", chan_id, " ", norm_hashrate)
                                                 await channel.edit(name=f"hashrate: {norm_hashrate}")
                                                 last_updates[chan_id] = time.time()
                                 
@@ -78,7 +75,8 @@ async def my_background_task():
                                         for chan_id in all_valid_ids:
                                                 if time.time() < last_updates[chan_id] + 60 * 5: continue
                                                 channel = bot.get_channel(chan_id)
-                                                if channel.name.split()[1] == str(circ_supply): continue
+                                                #if channel.name.split()[1] == str(circ_supply): continue
+                                                print("updating: ", chan_id, " ", circ_supply)
                                                 await channel.edit(name=f"supply: {int(circ_supply):,}")
                                                 last_updates[chan_id] = time.time()
                                 
@@ -90,9 +88,9 @@ async def my_background_task():
                                                 followers = "Error"
                                         for chan_id in all_valid_ids:
                                                 if time.time() < last_updates[chan_id] + 60 * 5: continue
-                                                print(followers)
                                                 channel = bot.get_channel(chan_id)
-                                                if channel.name.split()[1] == str(followers): continue
+                                                #if channel.name.split()[1] == str(followers): continue
+                                                print("updating: ", chan_id, " ", followers)
                                                 await channel.edit(name=f"twitter: {followers}")
                                                 last_updates[chan_id] = time.time()
                                 
@@ -105,7 +103,8 @@ async def my_background_task():
                                                 if time.time() < last_updates[chan_id] + 60 * 5: continue
                                                 print(guild.approximate_member_count)
                                                 channel = bot.get_channel(chan_id)
-                                                if channel.name.split()[1] == str(guild.approximate_member_count): continue
+                                                #if channel.name.split()[1] == str(guild.approximate_member_count): continue
+                                                print("updating: ", chan_id, " ", guild.approximate_member_count)
                                                 await channel.edit(name=f"discord: {guild.approximate_member_count}")
                                                 last_updates[chan_id] = time.time()
                                 
@@ -120,9 +119,9 @@ async def my_background_task():
                                                 members = "Error"
                                         for chan_id in all_valid_ids:
                                                 if time.time() < last_updates[chan_id] + 60 * 5:  continue
-                                                print(members)
                                                 channel = bot.get_channel(chan_id)
-                                                if channel.name.split()[1] == str(members): continue
+                                                #if channel.name.split()[1] == str(members): continue
+                                                print("updating: ", chan_id, " ", members)
                                                 await channel.edit(name=f"telegram: {members}")
                                                 last_updates[chan_id] = time.time()
 
@@ -187,7 +186,6 @@ async def address_mining(cxt, address, window_size = 7200, *args):
     utxos = kaspa.get_utxo_entries([address,])
     stats = kaspa.get_stats()
     start_block = kaspa.get_blocks(stats['pruning_point'])[-window_size]
-    print(start_block)
     network_hashrate = kaspa.estimate_network_hashrate(start_block, window_size)
     cut_off = int(stats['daa_score']) - window_size
     addr_percent = helpers.mining_stats([address,], utxos, cut_off, int(stats['daa_score']))[address]['network_percent']
@@ -326,7 +324,6 @@ async def market_data(cxt, quote_asset = "usd", *args):
     circ_supply = helpers.sompis_to_kas(kaspa.get_circ_supply())
     market_data = cryptoinfo.kaspa_market_info(quote_asset)
     market_data.update(helpers.get_market_caps(market_data["value"], circ_supply))
-    print(market_data)
     msg = ans.MARKET_DATA(market_data)
     await _send(cxt, msg, here)
   except (Exception, grpc.RpcError) as e:
@@ -369,10 +366,8 @@ async def halving(cxt, start=None, end=None, *args):
 @bot.command(hidden=True)
 async def test(cxt, *args):
   '''test command'''
-  print(*args)
   here = True if 'here' in args else False
   ghost = True if 'ghost' in args else False
-  print('test')
   try:
     msg = ans.SUCCESS
     if 'fail' in args:
@@ -391,7 +386,6 @@ async def top_miners(cxt, amount = 5, window = 3600, *args):
     blocks = kaspa.get_blocks(stats['pruning_point'])
     target_block = blocks[-100]
     detailed_blocks = kaspa.get_blocks_detailed(target_block)
-    print('window', len(detailed_blocks))
     mining_addrs = dict(list(helpers.get_mining_addresses(detailed_blocks).items())[:20])
     msg = ans.TOP_GAINERS(mining_addrs)
     await _send(cxt, msg, here)

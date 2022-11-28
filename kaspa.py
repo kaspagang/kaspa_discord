@@ -78,7 +78,6 @@ def get_utxo_entries(addrs, use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
     cli.close()
     return get_utxo_entries(use_dedicated_node=False, tries=tries+1)
   try:
-    print(addrs)
     utxo_entries = list(cli.request('getUtxosByAddressesRequest', {'addresses' : addrs})['getUtxosByAddressesResponse']['entries'])
     #utxos = [utxo['utxoEntry'] for utxo in utxo_entries]
   except (Exception, grpc.RpcError) as e:
@@ -147,7 +146,6 @@ def estimate_network_hashrate(start_block_hash, window_size, use_dedicated_node=
     return estimate_network_hashrate(start_block_hash, window_size, use_dedicated_node=False, tries=tries+1)
   try:
     network_hashrate = cli.request('estimateNetworkHashesPerSecondRequest', {'windowSize' : window_size, 'startHash' : start_block_hash})['estimateNetworkHashesPerSecondResponse']['networkHashesPerSecond']
-    print('hashrate', network_hashrate)
   except (Exception, grpc.RpcError) as e:
     print(e)
     cli.close()
