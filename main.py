@@ -48,7 +48,7 @@ async def my_background_task():
                                         for chan_id in all_valid_ids:
                                                 if time.time() < last_updates[chan_id] + 60 * 5: continue
                                                 channel = bot.get_channel(chan_id)
-                                                #if channel.name.split()[1] == str(value): continue
+                                                if channel.name.split()[1] == str(value): continue
                                                 print("updating: ", chan_id, " ", value)
                                                 await channel.edit(name=f"value: {value}")
                                                 last_updates[chan_id] = time.time()
@@ -62,7 +62,7 @@ async def my_background_task():
                                         for chan_id in all_valid_ids:
                                                 if time.time() < last_updates[chan_id] + 60 * 5: continue
                                                 channel = bot.get_channel(chan_id)
-                                                #if channel.name.split()[1] == str(norm_hashrate): continue
+                                                if channel.name.split()[1] == str(norm_hashrate): continue
                                                 print("updating: ", chan_id, " ", norm_hashrate)
                                                 await channel.edit(name=f"hashrate: {norm_hashrate}")
                                                 last_updates[chan_id] = time.time()
@@ -75,7 +75,7 @@ async def my_background_task():
                                         for chan_id in all_valid_ids:
                                                 if time.time() < last_updates[chan_id] + 60 * 5: continue
                                                 channel = bot.get_channel(chan_id)
-                                                #if channel.name.split()[1] == str(circ_supply): continue
+                                                if channel.name.split()[1] == str(circ_supply): continue
                                                 print("updating: ", chan_id, " ", circ_supply)
                                                 await channel.edit(name=f"supply: {int(circ_supply):,}")
                                                 last_updates[chan_id] = time.time()
@@ -89,7 +89,7 @@ async def my_background_task():
                                         for chan_id in all_valid_ids:
                                                 if time.time() < last_updates[chan_id] + 60 * 5: continue
                                                 channel = bot.get_channel(chan_id)
-                                                #if channel.name.split()[1] == str(followers): continue
+                                                if channel.name.split()[1] == str(followers): continue
                                                 print("updating: ", chan_id, " ", followers)
                                                 await channel.edit(name=f"twitter: {followers}")
                                                 last_updates[chan_id] = time.time()
@@ -103,7 +103,7 @@ async def my_background_task():
                                                 if time.time() < last_updates[chan_id] + 60 * 5: continue
                                                 print(guild.approximate_member_count)
                                                 channel = bot.get_channel(chan_id)
-                                                #if channel.name.split()[1] == str(guild.approximate_member_count): continue
+                                                if channel.name.split()[1] == str(guild.approximate_member_count): continue
                                                 print("updating: ", chan_id, " ", guild.approximate_member_count)
                                                 await channel.edit(name=f"discord: {guild.approximate_member_count}")
                                                 last_updates[chan_id] = time.time()
@@ -120,7 +120,7 @@ async def my_background_task():
                                         for chan_id in all_valid_ids:
                                                 if time.time() < last_updates[chan_id] + 60 * 5:  continue
                                                 channel = bot.get_channel(chan_id)
-                                                #if channel.name.split()[1] == str(members): continue
+                                                if channel.name.split()[1] == str(members): continue
                                                 print("updating: ", chan_id, " ", members)
                                                 await channel.edit(name=f"telegram: {members}")
                                                 last_updates[chan_id] = time.time()
