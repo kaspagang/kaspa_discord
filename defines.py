@@ -37,6 +37,9 @@ STAT_CHANS = {
         "twitter" : [1046804335947952158, 1046343033559466084, None], #kaspa, test, custom
         "discord" : [1046804371331088384, 1046342883621482547, None], #kaspa, test, custom
         "telegram" : [1046804400481513555, 1046343989697191986, None], #kaspa, test, custom
+        "TPS" : [1047470535019352084, 1047485804907339846, None], #kaspa, test, custom
+        "reward" : [1047470565910380594, 1047485804907339846, None], #kaspa, test, custom
+        "next-phase" : [1047470595241168996, 1047484963517366292, None], #kaspa, test, custom
 }
 
 SER_TO_ANSWER_CHAN = {

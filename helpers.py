@@ -26,7 +26,7 @@ def sompis_to_kas(sompis, round_amount=None):
     return round(sompis / 100000000, round_amount)
   return sompis / 100000000
 
-def daa_score_to_date(current_daa, target_daa, current_timestamp):
+def daa_score_to_date(current_daa, target_daa, current_timestamp) -> datetime:
   current_timestamp = round(current_timestamp)
   daa_diff = target_daa - current_daa
   return datetime.utcfromtimestamp(current_timestamp + round(daa_diff*1)).strftime('%d-%m-%Y %H:%M:%S')

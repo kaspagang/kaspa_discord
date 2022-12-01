@@ -3,7 +3,7 @@ import asyncio
 from discord.ext import commands, tasks
 import random
 
-from defines import (answers as ans, devfund_addresses as dev_addrs, rustfund_addresses as rus_addrs)
+from defines import (answers as ans, devfund_addresses as dev_addrs, rustfund_addresses as rus_addrs, kaspa_constants as kc)
 from defines import *
 
 import bs4
@@ -37,7 +37,6 @@ async def my_background_task():
         while True:
                 for stat_type, chan_ids in STAT_CHANS.items():
                         all_valid_ids = [chan_id for chan_id in chan_ids if isinstance(chan_id, int)]
-                        await asyncio.sleep(10)
                         if bool(all_valid_ids):
                                 if stat_type == "value":
                                         try:
@@ -48,25 +47,91 @@ async def my_background_task():
                                         for chan_id in all_valid_ids:
                                                 if time.time() < last_updates[chan_id] + 60 * 5: continue
                                                 channel = bot.get_channel(chan_id)
-                                                if channel.name.split()[1] == str(value): continue
+                                                if channel.name == f"value: {value}": continue
                                                 print("updating: ", chan_id, " ", value)
                                                 await channel.edit(name=f"value: {value}")
                                                 last_updates[chan_id] = time.time()
-
-                                elif stat_type == "hashrate":
+                                if stat_type in ["hashrate", "TPS", "reward", "next-phase"]:
                                         try:
-                                                stats = kaspa.get_stats()
-                                                norm_hashrate = helpers.normalize_hashrate(int(stats['hashrate']))
-                                        except:
-                                                norm_hashrate = "Error"
-                                        for chan_id in all_valid_ids:
-                                                if time.time() < last_updates[chan_id] + 60 * 5: continue
-                                                channel = bot.get_channel(chan_id)
-                                                if channel.name.split()[1] == str(norm_hashrate): continue
-                                                print("updating: ", chan_id, " ", norm_hashrate)
-                                                await channel.edit(name=f"hashrate: {norm_hashrate}")
-                                                last_updates[chan_id] = time.time()
-                                
+                                                        stats = kaspa.get_stats()
+                                        except Exception as e:
+                                                print(e)
+                                                stats = "Error"
+                                        if stat_type == "TPS":
+                                                try:
+                                                        if stats == "Error": raise Exception
+                                                        blocks = kaspa.get_blocks(stats['pruning_point'])
+                                                        detailed_blocks = kaspa.get_blocks_detailed(blocks[-100])
+                                                        tps, kasps = 0, 0
+                                                        for block in detailed_blocks:
+                                                                #if not block['verboseData']['isChainBlock']: continue
+                                                                tps += len(block['transactions'])
+                                                                for tx in block['transactions']:
+                                                                        for output in tx['outputs']:
+                                                                                kasps += int(output['amount'])
+                                                        tps = round(tps / len(detailed_blocks), 1)
+                                                        kasps = round(helpers.sompis_to_kas(kasps) / len(detailed_blocks))
+                                                except Exception as e:
+                                                        print(e)
+                                                        tps, kasps = "Error", "Error"
+                                                for chan_id in all_valid_ids:
+                                                        if time.time() < last_updates[chan_id] + 60 * 5: continue
+                                                        channel = bot.get_channel(chan_id)
+                                                        if channel.name == f"TPS: {tps} ({int(kasps):,} KAS/s)": continue
+                                                        print("updating: ", chan_id, " ", tps, " ", kasps)
+                                                        await channel.edit(name=f"TPS: {tps} ({int(kasps):,} KAS/s)")
+                                                        last_updates[chan_id] = time.time()
+                                        elif stat_type in  "hashrate":
+                                                try:
+                                                        if stats == "Error": raise Exception
+                                                        norm_hashrate = helpers.normalize_hashrate(int(stats['hashrate']))
+                                                except:
+                                                        norm_hashrate = "Error"
+                                                for chan_id in all_valid_ids:
+                                                        if time.time() < last_updates[chan_id] + 60 * 5: continue
+                                                        channel = bot.get_channel(chan_id)
+                                                        if channel.name == f"hashrate: {norm_hashrate}": continue
+                                                        print("updating: ", chan_id, " ", norm_hashrate)
+                                                        await channel.edit(name=f"hashrate: {norm_hashrate}")
+                                                        last_updates[chan_id] = time.time()
+                                        elif stat_type in ["reward", "next-phase"]:
+                                                try:
+                                                        if stats == "Error": raise Exception
+                                                        phase = helpers.get_current_halving_phase(int(stats['daa_score']))
+                                                        reward = kc.DEFLATIONARY_TABLE[phase]["reward_per_daa"]
+                                                except Exception as e:
+                                                        print(e)
+                                                        phase = "Error"
+                                                if stat_type == "reward":
+                                                        try:
+                                                                if phase == "Error": raise Exception  
+                                                                reward = round(kc.DEFLATIONARY_TABLE[phase]["reward_per_daa"], 2)  
+                                                        except Exception as e:
+                                                                print(e)
+                                                                reward = "Error"
+                                                        for chan_id in all_valid_ids:
+                                                                if time.time() < last_updates[chan_id] + 60 * 5: continue
+                                                                channel = bot.get_channel(chan_id)
+                                                                if channel.name == f"block-reward: {reward}": continue
+                                                                print("updating: ", chan_id, " ", reward)
+                                                                await channel.edit(name=f"block-reward: {reward}")
+                                                                last_updates[chan_id] = time.time()
+                                                elif stat_type == "next-phase":
+                                                        try:
+                                                                if phase == "Error": raise Exception
+                                                                next_daa = kc.DEFLATIONARY_TABLE[phase]["daa_range"].stop
+                                                                date = helpers.daa_score_to_date(int(stats['daa_score']), next_daa, time.time()).split()[0]
+                                                                #date = f"{date.day}/{date.month}/{date.year}"
+                                                        except Exception as e:
+                                                                print(e)
+                                                                date = "Error"
+                                                        for chan_id in all_valid_ids:
+                                                                if time.time() < last_updates[chan_id] + 60 * 5: continue
+                                                                channel = bot.get_channel(chan_id)
+                                                                if channel.name == f"next-phase: {date}": continue
+                                                                print("updating: ", chan_id, " ", date)
+                                                                await channel.edit(name=f"next-phase: {date}")
+                                                                last_updates[chan_id] = time.time()
                                 elif stat_type == "supply":
                                         try:
                                                 circ_supply = helpers.sompis_to_kas(kaspa.get_circ_supply())
@@ -75,7 +140,7 @@ async def my_background_task():
                                         for chan_id in all_valid_ids:
                                                 if time.time() < last_updates[chan_id] + 60 * 5: continue
                                                 channel = bot.get_channel(chan_id)
-                                                if channel.name.split()[1] == str(circ_supply): continue
+                                                if channel.name == f"supply: {int(circ_supply):,}": continue
                                                 print("updating: ", chan_id, " ", circ_supply)
                                                 await channel.edit(name=f"supply: {int(circ_supply):,}")
                                                 last_updates[chan_id] = time.time()
@@ -89,7 +154,7 @@ async def my_background_task():
                                         for chan_id in all_valid_ids:
                                                 if time.time() < last_updates[chan_id] + 60 * 5: continue
                                                 channel = bot.get_channel(chan_id)
-                                                if channel.name.split()[1] == str(followers): continue
+                                                if channel.name == f"twitter: {followers}": continue
                                                 print("updating: ", chan_id, " ", followers)
                                                 await channel.edit(name=f"twitter: {followers}")
                                                 last_updates[chan_id] = time.time()
@@ -103,7 +168,7 @@ async def my_background_task():
                                                 if time.time() < last_updates[chan_id] + 60 * 5: continue
                                                 print(guild.approximate_member_count)
                                                 channel = bot.get_channel(chan_id)
-                                                if channel.name.split()[1] == str(guild.approximate_member_count): continue
+                                                if channel.name == f"discord: {guild.approximate_member_count}": continue
                                                 print("updating: ", chan_id, " ", guild.approximate_member_count)
                                                 await channel.edit(name=f"discord: {guild.approximate_member_count}")
                                                 last_updates[chan_id] = time.time()
@@ -120,11 +185,11 @@ async def my_background_task():
                                         for chan_id in all_valid_ids:
                                                 if time.time() < last_updates[chan_id] + 60 * 5:  continue
                                                 channel = bot.get_channel(chan_id)
-                                                if channel.name.split()[1] == str(members): continue
+                                                if channel.name == f"telegram: {members}": continue
                                                 print("updating: ", chan_id, " ", members)
                                                 await channel.edit(name=f"telegram: {members}")
                                                 last_updates[chan_id] = time.time()
-
+                await asyncio.sleep(60 * 5)
 ## commands ###
         
 @bot.command()
