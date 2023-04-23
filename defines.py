@@ -5,7 +5,9 @@ import datetime
 
 DEV_ID = os.environ['DEV_ID']
 TOKEN = os.environ['TOKEN']
-HOST_IP = os.environ['HOST_IP2']
+HOST_IP1 = os.environ['HOST_IP1']
+HOST_IP2 = os.environ['HOST_IP2']
+HOST_IP3 = os.environ['HOST_IP3']
 HOST_PORT = os.environ['HOST_PORT']
 DONATOR1 = os.environ['DONATOR1']
 
