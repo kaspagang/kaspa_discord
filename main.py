@@ -147,7 +147,7 @@ async def my_background_task():
                                 
                                 elif stat_type == "twitter":
                                         try:
-                                                followers = get("https://cdn.syndication.twimg.com/widgets/followbutton/info.json?screen_names=kaspaCurrency").json()[0]["followers_count"]
+                                                followers = get("https://api.coingecko.com/api/v3/coins/kaspa?localization=false&tickers=false&market_data=false&community_data=true&developer_data=false&sparkline=false").json()["community_data"]["twitter_followers"]
                                         except Exception as e:
                                                 print(e)
                                                 followers = "Error"
@@ -175,10 +175,8 @@ async def my_background_task():
                                 
                                 elif stat_type == "telegram":
                                         try:
-                                                result = get("https://t.me/kaspaenglish")
-                                                soup = bs4.BeautifulSoup(result.text,"lxml")
-                                                raw_members: str = soup.find_all("div", {'class':'tgme_page_extra'})[0].get_text()
-                                                members = int(raw_members.replace(' ', '').split("m")[0])
+                                                members = get("https://api.coingecko.com/api/v3/coins/kaspa?localization=false&tickers=false&market_data=false&community_data=true&developer_data=false&sparkline=false").json()["community_data"]["telegram_channel_user_count"]
+         
                                         except Exception as e:
                                                 print(e)
                                                 members = "Error"
