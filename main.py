@@ -3,8 +3,7 @@ import asyncio
 from discord.ext import commands, tasks
 import random
 
-from defines import (answers as ans, devfund_addresses as dev_addrs, rustfund_addresses as rus_addrs, kaspa_constants as kc)
-from defines import *
+from defines import (answers as ans, devfund_addresses as dev_addrs, rustfund_addresses as rus_addrs, kaspa_constants as kc, STAT_CHANS, CALL_FOR_DONATION_PROB, DONATORS, SER_TO_ANSWER_CHAN)
 
 import bs4
 import helpers
