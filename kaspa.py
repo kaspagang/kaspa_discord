@@ -1,10 +1,7 @@
 from kaspy.kaspa_clients import RPCClient
 from kaspy.utils.version_comparer import version as ver 
-import logging 
 import grpc
 from defines import HOST_IP1, HOST_PORT, TRY_DEDICATED_NODE 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.Ihttps://github.com/kaspagang/kaspa_discord/edit/main/kaspa.pyNFO)
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 def get_balances(*addrs, use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
   if tries == 3:
