@@ -9,7 +9,7 @@ def get_balances(*addrs, use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
   cli = RPCClient()
   try:
     if use_dedicated_node:
-      cli.connect(HOST_IP, int(HOST_PORT))
+      cli.connect(HOST_IP1, int(HOST_PORT))
     else:
       cli.auto_connect(min_kaspad_version=ver(0,12,3), utxoindex=True)
   except (Exception, grpc.RpcError) as e:
@@ -68,7 +68,7 @@ def get_utxo_entries(addrs, use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
   cli = RPCClient()
   try:
     if use_dedicated_node:
-      cli.connect(HOST_IP, int(HOST_PORT),  max_receive_size= -1)
+      cli.connect(HOST_IP1, int(HOST_PORT),  max_receive_size= -1)
     else:
       cli.auto_connect(min_kaspad_version=ver(0,12,3), utxoindex=True, max_receive_size= -1)
   except (Exception, grpc.RpcError) as e:
@@ -90,7 +90,7 @@ def get_blocks(start_block_hash, use_dedicated_node=TRY_DEDICATED_NODE, tries = 
   cli = RPCClient()
   try:
     if use_dedicated_node:
-      cli.connect(HOST_IP, int(HOST_PORT),  max_receive_size= -1)
+      cli.connect(HOST_IP1, int(HOST_PORT),  max_receive_size= -1)
     else:
       cli.auto_connect(min_kaspad_version=ver(0,12,3), utxoindex=True,  max_receive_size= -1)
   except (Exception, grpc.RpcError) as e:
@@ -112,7 +112,7 @@ def get_blocks_detailed(start_block_hash, use_dedicated_node=TRY_DEDICATED_NODE,
   cli = RPCClient()
   try:
     if use_dedicated_node:
-      cli.connect(HOST_IP, int(HOST_PORT),  max_receive_size= -1)
+      cli.connect(HOST_IP1, int(HOST_PORT),  max_receive_size= -1)
     else:
       cli.auto_connect(min_kaspad_version=ver(0,12,3), utxoindex=True,  max_receive_size= -1)
   except (Exception, grpc.RpcError) as e:
@@ -134,7 +134,7 @@ def estimate_network_hashrate(start_block_hash, window_size, use_dedicated_node=
   cli = RPCClient()
   try:
     if use_dedicated_node:
-      cli.connect(HOST_IP, int(HOST_PORT),  max_receive_size= -1)
+      cli.connect(HOST_IP1, int(HOST_PORT),  max_receive_size= -1)
     else:
       cli.auto_connect(min_kaspad_version=ver(0,12,3), utxoindex=True)
   except (Exception, grpc.RpcError) as e:
@@ -156,7 +156,7 @@ def get_circ_supply(use_dedicated_node=TRY_DEDICATED_NODE, tries = 0):
   cli = RPCClient()
   try:
     if use_dedicated_node:
-      cli.connect(HOST_IP, int(HOST_PORT),  max_receive_size= -1)
+      cli.connect(HOST_IP1, int(HOST_PORT),  max_receive_size= -1)
     else:
       cli.auto_connect(min_kaspad_version=ver(0,12,3), utxoindex=True)
   except (Exception, grpc.RpcError) as e:
